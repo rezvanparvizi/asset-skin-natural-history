@@ -1,0 +1,16 @@
+# Sensitivity counterpart to `placebo`.
+cohort_id: placebo_all
+description: >
+  Placebo arm, ALL samples including post-escape-therapy. Exists solely
+  so that every censored result can be reported next to its uncensored
+  version.
+layer: 2
+include:
+  group: [SSC]
+  arm: [PLACEBO]
+  timepoint: [M00, M03, M06]
+exclude_post_escape: false
+notes: >
+  Do not use as a primary analysis. Any month-6 finding that appears here
+  but not in `placebo` is a candidate escape-therapy artifact.
+requires_clinical: false

@@ -1,0 +1,17 @@
+cohort_id: placebo_hc
+description: >
+  Placebo arm (post-escape censored) plus healthy controls. Gives the
+  "normalization toward healthy" anchor: does improving skin move toward
+  the HC cell-state distribution, or somewhere else entirely?
+layer: 2
+include:
+  group: [SSC, HC]
+  arm: [PLACEBO, NA]      # HC rows carry arm = NA
+  timepoint: [M00, M03, M06]
+exclude_post_escape: true
+notes: >
+  Healthy controls have no timepoint structure — treat them as a fixed
+  reference point, not as a longitudinal arm. Check whether HC libraries
+  were captured in the same batches as SSc before drawing conclusions
+  from HC-vs-SSc differences.
+requires_clinical: true

@@ -1,0 +1,15 @@
+cohort_id: basectrl
+description: >
+  Baseline SSc samples (both arms) plus healthy controls. Cross-sectional
+  disease signature at cell-type resolution. Mirrors the colleague's
+  "base_control" scope, so results are directly comparable to hers.
+layer: 2
+include:
+  group: [SSC, HC]
+  timepoint: [M00]
+exclude_post_escape: false
+notes: >
+  Baseline only, so escape therapy is irrelevant by construction. Useful
+  as a sanity check that your label space reproduces known SSc-vs-HC
+  differences before you trust it on longitudinal contrasts.
+requires_clinical: false

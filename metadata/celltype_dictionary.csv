@@ -1,0 +1,16 @@
+lineage,celltype,subtype,label_short,defining_markers,source_reference,notes
+Stromal,Fibroblast,SFRP2_DPP4,Fib_SFRP2,SFRP2;DPP4;PI16,Tabib 2021 Nat Commun,progenitor pool that gives rise to myofibroblasts
+Stromal,Fibroblast,PRSS23_THBS1,Fib_PRSS23,PRSS23;THBS1,Tabib 2021 Nat Commun,intermediate state on the myofibroblast trajectory
+Stromal,Fibroblast,SFRP4_FNDC1,Fib_SFRP4,SFRP4;FNDC1;COMP,Tabib 2021 Nat Commun,myofibroblast; expected to CONTRACT in regression
+Stromal,Fibroblast,PI16_universal,Fib_PI16,PI16;CD34,Buechler 2021 Nature,universal/quiescent; expected to RECOVER in regression
+Stromal,Adipocyte,ADIPOQ,Adipo,ADIPOQ;PLIN1;FABP4;PPARG,Marangoni 2015 Arthritis Rheumatol,adipose niche; recovery = regression / loss = atrophy
+Myeloid,Macrophage,M2_CD163,Mac_M2,CD163;CD204;MRC1,,profibrotic; expected to FALL in regression
+Myeloid,Macrophage,MMP_restorative,Mac_MMP,MMP9;MMP12;MMP13,Ramachandran 2019 Nature (liver),restorative/ReM2 analogue; IMPORTED HYPOTHESIS not established in SSc skin
+TNK,CD8_T,TEM,CD8_TEM,CD8A;GZMK;CCL5,Poon et al,
+TNK,CD8_T,cytotoxic,CD8_cyto,GZMB;PRF1;SLAMF7,Gurrea-Rubio 2026,SLAMF7 link to the blood findings
+TNK,CD4_T,Treg,Treg,FOXP3;IL2RA;CTLA4,,
+BPlasma,B_cell,memory,B_mem,MS4A1;CD27,,labels available from colleague
+BPlasma,Plasma,plasma,Plasma,MZB1;JCHAIN;XBP1,,labels available from colleague
+Vascular,Endothelial,,EC,PECAM1;VWF,,
+Vascular,Lymphatic,,LEC,PROX1;LYVE1,,
+Keratinocyte,Keratinocyte,,KC,KRT14;KRT1,,visible in single-cell but washed out in bulk skin

@@ -1,0 +1,82 @@
+# ==============================================================
+# config/de_runs/EXAMPLE_fib_improver_vs_non_m0.yml
+#
+# One file per differential-expression contrast. Consumed by
+# pipelines/pseudobulk_de.R. Copy this, rename it after the QUESTION,
+# and delete the EXAMPLE_ prefix.
+#
+#   jobs/run.sh pipelines/pseudobulk_de.R \
+#     --freeze freeze01 --cohort placebo --labelset labelset01 \
+#     --config config/de_runs/fib_improver_vs_non_m0.yml
+# ==============================================================
+
+run_name: fib_improver_vs_non_m0
+question: >
+  At baseline, do fibroblasts differ between placebo-arm patients who
+  went on to improve by month 12 and those who did not?
+
+# ---- cells ---------------------------------------------------
+cell_selection:
+  label_column: celltype        # which level of the label hierarchy
+  labels: [Fibroblast]          # which value(s)
+  timepoints: [M00]
+
+# ---- pseudobulk aggregation ---------------------------------
+aggregation:
+  unit: sample_id               # one pseudobulk column per sample per celltype
+  method: sum                   # sum raw counts (NOT mean of normalized)
+  min_cells_per_unit: 20        # drop pseudobulk columns below this
+  min_samples_expressing: 0.2   # gene filter: fraction of columns with count >= min_count
+  min_count: 10
+
+# ---- model ---------------------------------------------------
+# engine: deseq2 | limma_voom | dream
+#
+# deseq2      — fine for CROSS-SECTIONAL contrasts (this one: baseline only,
+#               one sample per subject). No random-effects term.
+# limma_voom  — use with duplicateCorrelation() when the SAME subject
+#               contributes multiple timepoints.
+# dream       — variancePartition::dream, proper mixed model with
+#               (1|subject_id). Preferred for any longitudinal contrast.
+#
+# The colleague's pipeline uses DESeq2 throughout, which is appropriate
+# for her mostly cross-sectional contrasts. Longitudinal contrasts in
+# THIS project need limma_voom or dream, or patient identity is not
+# modelled at all. Keep her output contract; swap the engine.
+model:
+  engine: deseq2
+  design: "~ improver_12m + rnap3 + disease_duration_yr + batch_id"
+  contrast:
+    variable: improver_12m
+    numerator: improver          # >= 5-point OR > 20% mRSS reduction at M12
+    denominator: non_improver
+  random_effect: null            # e.g. "(1|subject_id)" when engine = dream
+  covariate_notes: >
+    RNAP3 and tendon friction rubs predict placebo mRSS trajectory
+    (Domsic 2023). Disease duration separates genuine matrix resolution
+    from late dermal atrophy. batch_id is included because batch
+    confounding is hazard #1 — drop it only if 00_manifest_and_batch
+    shows batch is balanced across the contrast.
+
+# ---- thresholds ---------------------------------------------
+thresholds:
+  alpha: 0.05
+  padj_method: BH
+  lfc_shrink: true              # DESeq2 apeglm
+  report_lfc_min: 0.25
+
+# ---- gene sets to score on the result -----------------------
+gene_sets:
+  - cd28_costimulation_reactome
+  - sasp_senescence
+  - tgfb_response_thbs1_comp
+
+# ---- expected power ----------------------------------------
+# Be explicit. Roughly 19 improvers vs 19 non-improvers in the placebo
+# arm at 12 months. Any further stratification (by intrinsic subset,
+# say) drops to single digits. Say so in the manuscript; do not let an
+# exploratory split read as a result.
+power_note: >
+  ~19 vs ~19 subjects. Adequately powered only for moderate-to-large
+  effects in abundant cell types. Fibroblast and myeloid compartments
+  are the realistic targets; rare states are not.

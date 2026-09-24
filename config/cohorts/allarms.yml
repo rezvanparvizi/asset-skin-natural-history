@@ -1,0 +1,17 @@
+cohort_id: allarms
+description: >
+  Both treatment arms, all timepoints, SSc only. For contrasting the
+  natural-history trajectory against the abatacept-treated trajectory,
+  and for using the abatacept arm as an out-of-sample check on
+  natural-history predictors.
+layer: 2
+include:
+  group: [SSC]
+  arm: [PLACEBO, ABATACEPT]
+  timepoint: [M00, M03, M06]
+exclude_post_escape: true
+notes: >
+  Out of scope for the primary Project 1 analysis. Keep any arm
+  comparison clearly separated from the natural-history claim in both
+  the code and the manuscript.
+requires_clinical: true

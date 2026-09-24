@@ -1,0 +1,137 @@
+# ============================================================
+# ASSET skin scRNA-seq — .gitignore
+# Rule of thumb: code and configs in git; data never.
+# ============================================================
+
+# ---- heavy directories (symlinks to large storage) ----------
+data
+data/
+results
+results/
+figures
+figures/
+logs
+logs/
+
+# ---- single-cell / genomics objects -------------------------
+*.rds
+*.RDS
+*.rda
+*.RData
+*.qs
+*.qs2
+*.h5
+*.h5ad
+*.h5seurat
+*.loom
+*.zarr/
+*.mtx
+*.mtx.gz
+*.bam
+*.bai
+*.cram
+*.fastq
+*.fastq.gz
+*.fq.gz
+*.bed
+*.bigwig
+*.bw
+
+# BPCells on-disk matrix directories
+*_BPCells/
+*_BPCells_counts/
+*_counts/
+
+# CellRanger / Space Ranger outputs
+outs/
+SC_RNA_COUNTER_CS/
+_cmdline
+_log
+_perf*
+_versions
+
+# ---- PATIENT-LEVEL DATA — never commit ----------------------
+# Clinical tables from the Data Coordinating Center
+metadata/clinical/
+data/clinical/
+*clinical*.csv
+*clinical*.tsv
+*clinical*.xlsx
+*_mrss_*
+*_mRSS_*
+*autoantibod*
+*escape_therapy*
+
+# The real manifest carries arm/timepoint per library; the TEMPLATE is tracked.
+metadata/library_manifest.csv
+!metadata/library_manifest_TEMPLATE.csv
+
+# Cell-level label tables (large, and barcode-linked to subjects)
+metadata/labels/
+metadata/inherited_labels/
+!metadata/labels/.gitkeep
+!metadata/inherited_labels/.gitkeep
+!metadata/labels/*_README.md
+
+# ---- allow-list: small derived summary tables ---------------
+# Useful to version because they are small and diffable, so you can see
+# when a result changes. Uncomment if you want this behaviour.
+# !results/**/tables/*.csv
+# !results/**/*_summary.csv
+
+# ---- R ------------------------------------------------------
+.Rproj.user/
+.Rhistory
+.Rapp.history
+.RData
+.RDataTmp
+.Ruserdata
+*.Rproj
+renv/library/
+renv/local/
+renv/cellar/
+renv/lock/
+renv/python/
+renv/staging/
+.Rprofile.user
+
+# renv keeps these, do not ignore:
+!renv.lock
+!renv/activate.R
+!renv/settings.json
+
+# ---- Python (scVI / TCAT / Scaden side of the pipeline) -----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+*.pt
+*.pth
+saved_model.pb
+variables/
+fingerprint.pb
+keras_metadata.pb
+
+# ---- stray device output ------------------------------------
+Rplots.pdf
+Rplot*.pdf
+Rplot*.png
+
+# ---- editor / OS --------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.positron/
+.idea/
+
+# ---- screen / job scratch -----------------------------------
+screenlog.*
+nohup.out
+core.*

@@ -1,0 +1,19 @@
+# PRIMARY Project 1 cohort.
+cohort_id: placebo
+description: >
+  Placebo arm only, with samples collected on or after escape-therapy
+  start censored. This is the treatment-naive natural-history cohort.
+layer: 2
+include:
+  group: [SSC]
+  arm: [PLACEBO]
+  timepoint: [M00, M03, M06]
+exclude_post_escape: true
+notes: >
+  16/44 placebo participants started immunomodulators from month 6,
+  specifically because they were worsening. Uncensored month-6 placebo
+  samples are therefore both partly drug-exposed and systematically
+  depleted of non-improvers. Always report results alongside the
+  placebo_all sensitivity analysis.
+requires_clinical: true
+expected_n_subjects: null    # TODO fill once manifest + clinical are joined
