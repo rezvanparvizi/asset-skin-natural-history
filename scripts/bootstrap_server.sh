@@ -317,7 +317,7 @@ step "5. Bootstrap packages"
 
 # Deliberately minimal: only what is needed to drive renv. The analysis stack
 # lives in per-project renv libraries.
-"$RSCRIPT" --vanilla -e "
+"$RSCRIPT" -e "
 options(repos = c(CRAN = '${CRAN_SNAPSHOT}'),
         Ncpus = ${JOBS}, warn = 1)
 lib <- '${BOOTSTRAP_LIB}'
@@ -353,7 +353,7 @@ SMOKE_LIB="$HOME/R/smoke-test-lib"
 mkdir -p "$SMOKE_LIB"
 
 echo; note "6a. BPCells (C++17 + HDF5)"
-"$RSCRIPT" --vanilla -e "
+"$RSCRIPT" -e "
 options(repos = c(BPCELLS = '${BPCELLS_UNIVERSE}', CRAN = '${CRAN_SNAPSHOT}'),
         Ncpus = ${JOBS}, warn = 1)
 .libPaths(c('${SMOKE_LIB}', .libPaths()))
@@ -379,7 +379,7 @@ unlink(d, recursive = TRUE)
 }
 
 echo; note "6b. variancePartition / dream (no precedent on this machine)"
-"$RSCRIPT" --vanilla -e "
+"$RSCRIPT" -e "
 options(repos = c(CRAN = '${CRAN_SNAPSHOT}'), Ncpus = ${JOBS}, warn = 1)
 .libPaths(c('${SMOKE_LIB}', .libPaths()))
 if (!requireNamespace('BiocManager', quietly = TRUE))
