@@ -98,7 +98,6 @@ cran_core <- c(
   "SeuratObject",     # 5.4.0
   "Matrix",           # 1.7-5  (bundled/recommended; snapshot agrees)
   "harmony",          # 2.0.3
-  "presto",           # fast Wilcoxon markers
   # modelling
   "lme4",             # variancePartition dependency, also used directly
   # data wrangling
@@ -123,7 +122,8 @@ bioc_core <- c(
 )
 
 github_core <- c(
-  MuSiC = "xuranw/MuSiC"   # bulk deconvolution, analysis/13_*
+  MuSiC  = "xuranw/MuSiC",             # bulk deconvolution, analysis/13_*
+  presto = "immunogenomics/presto"     # fast Wilcoxon markers; NOT on CRAN
 )
 
 deferred <- c(
