@@ -155,6 +155,7 @@ scripts/
   bootstrap_renv.R       project package library
   bootstrap_laptop.sh    macOS dev environment
 docs/
+  PROGRESS.md            WHERE THE PROJECT STANDS — read this first
   ENVIRONMENT.md         every environment decision and its reasoning
   runs.csv               append-only registry of every run + verdict
   decisions.md           dated log of judgment calls
@@ -319,16 +320,94 @@ in their baseline subset while the field reports transcriptomic
 
 ---
 
-## If you are an AI agent working in this repository
+## Working practices
 
-- Read `docs/ENVIRONMENT.md` before running or installing anything.
-- Read `docs/runs.csv` before proposing an analysis — it may already be done,
-  or already marked invalid.
-- Read `docs/decisions.md` before changing a parameter — the choice may be
-  deliberate and documented.
+### Read these first, in this order
+
+1. **`docs/PROGRESS.md`** — where the project stands right now: done, in
+   flight, blocked, next, and the open questions that must not be defaulted
+   on. This is the only file recording *temporal* state.
+2. **`AGENTS.md`** (this file) — structure and rules.
+3. **`docs/ENVIRONMENT.md`** — before running or installing anything. Its
+   workaround section lists six server-specific failures with symptoms; check
+   it before debugging any build error.
+4. **`docs/runs.csv`** — before proposing an analysis. It may already be done,
+   or already marked `invalid`.
+5. **`docs/decisions.md`** — before changing a parameter. The current value
+   may be deliberate and justified.
+
+### One task per session
+
+Keep a session scoped to one analysis stage or one bounded piece of work.
+Stage directories under `analysis/` are the natural units.
+
+The reason is context degradation, not tidiness. In a long session the risk
+shifts from "does not understand the task" to "optimises for consistency with
+earlier turns rather than correctness" — which produces confident, wrong,
+internally-coherent output. A concrete instance: during the environment build,
+a migration script was shipped that had rewritten its own rename table with
+`sed`, and the error was not caught because the session had been running for
+hours.
+
+When a session is done, update `docs/PROGRESS.md`. Two minutes.
+
+### Handshake before implementing
+
+For anything involving an analytical choice — a statistical design, a
+clustering decision, a cohort definition, an outcome variable — state the plan
+and get agreement before writing code:
+
+1. Restate the goal in one or two sentences.
+2. Say what will be computed, on which cohort, with which model.
+3. Name the assumption most likely to be wrong.
+4. Wait for confirmation.
+
+Skip the handshake for mechanical work (installing a package, fixing a typo,
+renaming a file).
+
+The asymmetry that justifies this: a build error announces itself, whereas a
+wrong statistical framing produces code that runs cleanly and answers a
+different question than the one asked. In this project the second failure mode
+is the expensive one.
+
+### Decisions get recorded, not just made
+
+`docs/decisions.md` is the decision log — the equivalent of Architecture
+Decision Records, kept as one dated append-only file rather than one file per
+decision. Every entry names the alternative rejected and why.
+
+Add an entry when: a threshold or resolution is chosen; a covariate is
+included or excluded; an outcome is defined; a package version is pinned; an
+inherited object is adopted or rebuilt.
+
+### Correctness checks, not unit tests
+
+Analysis code does not benefit from unit tests the way application code does.
+What it does benefit from is assertions on the properties that matter, run
+inside the pipeline:
+
+- pseudobulk aggregation preserves total counts per sample
+- a label join achieves complete barcode coverage — fail loudly, never
+  silently produce `NA`s
+- the design matrix is full rank before any model is fitted
+- one pseudobulk unit maps to exactly one subject, timepoint and batch
+- cell counts per unit exceed the declared minimum
+
+`pipelines/pseudobulk_de.R` already implements several of these. Add to them
+rather than importing a testing framework.
+
+### If you are an AI agent
+
 - Never write patient-level data into the repository.
 - Never run heavy computation in the foreground on the server; use
   `jobs/run.sh`, which detaches into `screen`.
 - Use `init_run()` / `finalize_run()` for anything that produces output, so
   provenance is recorded automatically.
 - Respect the three-layer rule: do not re-cluster in a cohort-scoped analysis.
+- Do not invent citations, statistics or GEO accessions. If unsure whether
+  something is real, say so.
+- Label mechanistic claims (a) established in human SSc skin, (b) imported
+  from liver/lung fibrosis or mouse models as hypothesis, or (c) observed in
+  this data. Most of the fibrosis-regression literature is (b).
+- If a script you produced has a bug, say so plainly rather than letting the
+  owner assume operator error.

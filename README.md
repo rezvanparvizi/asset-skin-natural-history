@@ -164,6 +164,7 @@ jobs/
   run.sh               launch a script in a detached screen session
   status.sh            list running jobs and tail their logs
 docs/
+  PROGRESS.md          where the project stands — read first each session
   runs.csv             append-only registry of every run + verdict
   decisions.md         dated log of judgment calls
   inherited_objects.md provenance of anything received from a colleague
