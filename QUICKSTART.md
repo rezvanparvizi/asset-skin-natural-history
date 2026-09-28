@@ -86,14 +86,14 @@ Project 1 is confounded and integration will not rescue it.
 
 ## 8. Then
 
-Write `analysis/01_sc_qc/01_1_qc.R` and onward. Every script starts:
+Write `analysis/03_sc_qc/03_1_qc.R` and onward. Every script starts:
 
 ```r
 source("config/paths.R")
 source("R/provenance.R")
 source("R/io.R")
 
-run <- init_run(stage = "01_sc_qc", run_name = "initial_qc",
+run <- init_run(stage = "03_sc_qc", run_name = "initial_qc",
                 notes = "per-library QC thresholds")
 ```
 

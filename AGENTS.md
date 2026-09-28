@@ -137,7 +137,16 @@ R/                     FUNCTIONS only, no top-level execution
   io.R                   config/label loading, BPCells path repair
   paths_check.R          environment sanity check
 pipelines/             config-driven, reusable (pseudobulk_de.R)
-analysis/              numbered stages, run in order, 00_ through 17_
+analysis/              numbered stages, run in order:
+  00_manifest_and_batch    metadata, manifest validation, BATCH HAZARD CHECK
+  01_bulk_skin             bulk skin RNA-seq (GSE217067): subsets, CD28, trajectory
+  02_bulk_pbmc             bulk baseline PBMC RNA-seq
+  03_sc_qc  04_sc_ambient  05_sc_integration  06_sc_lineage
+  07..10_sc_subcluster_*   fibroblast / myeloid / tnk / adipo_vascular
+  11_sc_assemble_labels    -> the frozen barcode->label table (Layer 1 output)
+  12_sc_composition  13_sc_pseudobulk_de
+  14_deconvolution         sc reference -> bulk skin (needs 11)
+  15_multimodal  16_clinical_models  17_figures
 jobs/
   run.sh                 launch a script in a DETACHED screen session
   status.sh              running jobs, load, recent log verdicts
@@ -161,7 +170,7 @@ data/ results/ figures/ logs/    [symlinks to large storage, gitignored]
 ## Conventions
 
 **Script naming:** `{stage}_{seq}_{verb_phrase}.R` →
-`05_3_label_fibroblast_subtypes.R`. Lexical sort equals execution order.
+`14_3_label_fibroblast_subtypes.R`. Lexical sort equals execution order.
 
 **Run naming:** `{compartment}_{contrast}_{scope}` →
 `fib_improver_vs_non_m0`. Describes the *question*, not the date or the
@@ -203,14 +212,22 @@ Do **not** use the system R. See `docs/ENVIRONMENT.md` for the full reasoning.
 
 ```
 R            ~/R/R-4.6.1  (source-built; system R is 4.3.2 / Bioc 3.18, stale)
-BLAS         ~/opt/openblas  (system has only reference BLAS)
+BLAS         ~/opt/openblas  OpenBLAS 0.3.34 (system has only reference BLAS)
 Packages     renv, per project, shared cache at ~/.cache/R/renv
+             292 installed, 277 in renv.lock
 CRAN         pinned to P3M snapshot focal/2026-06-01
 Bioconductor 3.23
 Pinned       Seurat 5.5.0 · SeuratObject 5.4.0 · Matrix 1.7-5 · harmony 2.0.3
              BPCells 0.3.1  (r-universe; SHA adc4a3c3)
 Ceiling      gcc 9.4 -> C++17 only, no C++20
+Not present  scDblFinder (C++20 ceiling), MuSiC (TOAST gone from Bioc 3.23)
 ```
+
+**Launch pattern matters.** Use `bash -c`, NOT `bash -lc` — the `-l` sources
+`.bashrc`, which can re-activate conda and shadow system libraries. Keep
+`/sbin` on PATH and `USE_BUNDLED_LIBUV=1` set. These are workarounds 1, 3 and
+4 in `docs/ENVIRONMENT.md`; read that file's workaround section BEFORE
+debugging any package build failure.
 
 Server is `mininubio.ddns.med.umich.edu`: Ubuntu 20.04, 32 cores, 503 GB RAM,
 **no root, no job scheduler**. Jobs run under `screen` via `jobs/run.sh`.

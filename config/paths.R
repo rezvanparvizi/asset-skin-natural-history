@@ -11,7 +11,7 @@
 #
 # Override any path with an environment variable of the same name,
 # which is what jobs/run.sh does. Example:
-#   ASSET_DATA=/other/mount Rscript analysis/01_sc_qc/01_1_qc.R
+#   ASSET_DATA=/other/mount Rscript analysis/03_sc_qc/03_1_qc.R
 # ==============================================================
 
 # ---- repo root -----------------------------------------------

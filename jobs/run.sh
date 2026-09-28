@@ -8,8 +8,8 @@
 # dropping VPN cannot kill the job.
 #
 # Usage:
-#   jobs/run.sh analysis/03_sc_integration/03_1_harmony.R
-#   jobs/run.sh analysis/05_sc_subcluster_fibroblast/05_2_sweep_resolution.R \
+#   jobs/run.sh analysis/05_sc_integration/05_1_harmony.R
+#   jobs/run.sh analysis/07_sc_subcluster_fibroblast/07_2_sweep_resolution.R \
 #       --freeze freeze01 --cohort reference --labelset labelset01
 #   jobs/run.sh pipelines/pseudobulk_de.R \
 #       --cohort placebo --config config/de_runs/fib_improver_vs_non_m0.yml

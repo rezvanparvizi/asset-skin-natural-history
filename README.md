@@ -120,7 +120,7 @@ results/{freeze}/{reference|cohort|exploratory}/{stage}/{run_name}/
 Example:
 
 ```
-results/freeze01/placebo/11_sc_pseudobulk_de/fib_improver_vs_non_m0/
+results/freeze01/placebo/13_sc_pseudobulk_de/fib_improver_vs_non_m0/
 ├── run_config.yml        # the RESOLVED config, copied in at runtime
 ├── session_info.txt      # R + package versions
 ├── git_sha.txt           # code version
@@ -180,9 +180,9 @@ data/ results/ figures/ logs/     [symlinks to large storage, gitignored]
 **Scripts:** `{stage}_{seq}_{verb_phrase}.R`
 
 ```
-05_1_subset_fibroblasts.R
-05_2_sweep_resolution.R
-05_3_label_fibroblast_subtypes.R
+14_1_subset_fibroblasts.R
+14_2_sweep_resolution.R
+14_3_label_fibroblast_subtypes.R
 ```
 
 Zero-padded, snake_case, lexical sort equals execution order.
@@ -217,7 +217,7 @@ archival trees nobody can safely clean up.
 
 ```bash
 # on the server, from the repo root
-jobs/run.sh analysis/05_sc_subcluster_fibroblast/05_1_subset_fibroblasts.R \
+jobs/run.sh analysis/07_sc_subcluster_fibroblast/14_1_subset_fibroblasts.R \
   --freeze freeze01 --cohort reference --labelset labelset01
 ```
 
@@ -232,7 +232,7 @@ source("config/paths.R")
 source("R/provenance.R")
 
 run <- init_run(
-  stage    = "05_sc_subcluster_fibroblast",
+  stage    = "07_sc_subcluster_fibroblast",
   run_name = "fib_subcluster_res_sweep",
   notes    = "Resolution sweep 0.1-0.8 on full-cohort fibroblasts"
 )
@@ -269,6 +269,11 @@ In descending order of how much they will save you:
 ---
 
 ## Setup
+
+**Environment is already built** on `mininubio`: R 4.6.1, OpenBLAS 0.3.34,
+Bioconductor 3.23, 277 packages locked in `renv.lock`. Read
+`docs/ENVIRONMENT.md` before installing anything or debugging a build — it
+records six installation workarounds specific to this server.
 
 See `docs/server_notes.md` for the full walkthrough (SSH keys, Positron remote,
 VPN, `screen`). Short version, on the server:

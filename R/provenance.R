@@ -93,7 +93,7 @@ REGISTRY_COLS <- c("run_id", "date", "freeze", "cohort", "labelset",
 
 #' Start a run: create its directory and write its provenance
 #'
-#' @param stage Stage directory name, e.g. "11_sc_pseudobulk_de".
+#' @param stage Stage directory name, e.g. "13_sc_pseudobulk_de".
 #' @param run_name Descriptive run name, e.g. "fib_improver_vs_non_m0".
 #'   Describes the QUESTION, not the date or the parameters.
 #' @param params Named list of analysis parameters to record verbatim

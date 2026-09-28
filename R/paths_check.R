@@ -164,7 +164,7 @@ if (length(sha)) {
 cat("\n=== run context ===\n")
 cat(sprintf("  freeze=%s  cohort=%s  labelset=%s\n", FREEZE, COHORT, LABELSET))
 cat(sprintf("  example results dir: %s\n",
-            results_dir("11_sc_pseudobulk_de", "example_run")))
+            results_dir("13_sc_pseudobulk_de", "example_run")))
 
 cat("\n=== summary ===\n")
 cat(sprintf("  %d failure(s), %d warning(s)\n\n", n_fail, n_warn))

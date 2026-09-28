@@ -55,7 +55,7 @@ if (length(miss)) {
 }
 
 run <- init_run(
-  stage    = "11_sc_pseudobulk_de",
+  stage    = "13_sc_pseudobulk_de",
   run_name = cfg$run_name,
   params   = cfg,
   notes    = cfg$question %||% ""

@@ -177,7 +177,7 @@ dance — which you can mostly skip.
 ### The pattern that avoids the dance entirely
 
 ```bash
-jobs/run.sh analysis/03_sc_integration/03_1_harmony.R
+jobs/run.sh analysis/05_sc_integration/05_1_harmony.R
 ```
 
 Under the hood this is `screen -dmS <name>`, where `-d -m` means
@@ -263,11 +263,11 @@ git pull                                   # if you also edit elsewhere
 
 # ... write or edit a script in Positron ...
 
-git add analysis/05_sc_subcluster_fibroblast/05_2_sweep_resolution.R
+git add analysis/07_sc_subcluster_fibroblast/07_2_sweep_resolution.R
 git commit -m "05_2: resolution sweep 0.1-0.8 on full-cohort fibroblasts"
 
 # commit BEFORE a run you intend to keep, so git_sha describes the code
-jobs/run.sh analysis/05_sc_subcluster_fibroblast/05_2_sweep_resolution.R \
+jobs/run.sh analysis/07_sc_subcluster_fibroblast/07_2_sweep_resolution.R \
   --freeze freeze01 --cohort reference --labelset labelset01
 
 jobs/status.sh                             # check on it
