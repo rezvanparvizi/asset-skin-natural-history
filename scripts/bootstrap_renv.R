@@ -114,7 +114,9 @@ bioc_core <- c(
   "DESeq2", "limma", "edgeR",
   "variancePartition",     # dream() — longitudinal pseudobulk
   "speckle",               # propeller — composition testing
-  "scDblFinder",
+  # "scDblFinder",   # BLOCKED: dep scrapper needs C++20 (gcc 9 ceiling).
+                     # See docs/ENVIRONMENT.md. Alternatives: DoubletFinder,
+                     # scds; or inherit QC calls from the colleague.
   "SingleR", "celldex",
   "scater", "scran",
   "glmGamPoi",
@@ -185,7 +187,7 @@ for (nm in names(github_core)) {
 step("Verification")
 
 check <- c("Seurat", "SeuratObject", "BPCells", "Matrix", "harmony",
-           "DESeq2", "limma", "edgeR", "speckle", "scDblFinder", "SingleR",
+           "DESeq2", "limma", "edgeR", "speckle", "SingleR",
            "SingleCellExperiment", "glmGamPoi", "MuSiC",
            if (vp_ok) "variancePartition")
 
