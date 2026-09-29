@@ -79,3 +79,24 @@ Evidence: <run_id or results path>
 Revisit when: <condition, e.g. "freeze02 adds libraries">
 
 -->
+
+## 2026-09-29 — AI coding assistant: data-access rules
+
+Decision: Claude Code (personal subscription, VS Code extension in Positron)
+is permitted on the server for code, logs and results. It is blocked from
+patient-level data.
+
+Convention: patient-level tables (clinical, mRSS, autoantibodies, escape
+therapy, the real library manifest, barcode-level labels) live ONLY in
+data/, metadata/clinical/, metadata/labels/ or metadata/inherited_labels/.
+Never in results/ or anywhere else.
+
+Enforcement: .claude/settings.json denies Claude's file tools on those
+folders, their real paths under /home/parvizi/asset-data/, and the /hits
+protection copy. Shell commands require manual approval; refuse any that
+touch those paths.
+
+Limitation: deny rules are a guardrail, not a security boundary. The
+folder convention is what makes them work.
+
+

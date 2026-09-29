@@ -411,3 +411,18 @@ rather than importing a testing framework.
   this data. Most of the fibrosis-regression literature is (b).
 - If a script you produced has a bug, say so plainly rather than letting the
   owner assume operator error.
+
+
+## Rules for AI agents working in this repository
+
+- Never read, print, summarise or search files under data/,
+  metadata/clinical/, metadata/labels/, metadata/inherited_labels/, or
+  metadata/library_manifest.csv, by any route, including shell commands
+  such as cat, head, less, grep, or R/Python code that loads them.
+- If a task seems to require patient-level data, stop and ask. Work from
+  the column names or the TEMPLATE files instead.
+- Do not propose moving patient-level tables into results/ or any other
+  readable folder.
+- Heavy computation never runs in the foreground: use jobs/run.sh.
+- Follow the three-layer rule and the integration rule stated above.
+

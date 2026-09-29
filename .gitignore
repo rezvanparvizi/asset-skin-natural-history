@@ -57,10 +57,18 @@ data/clinical/
 *clinical*.csv
 *clinical*.tsv
 *clinical*.xlsx
-*_mrss_*
-*_mRSS_*
-*autoantibod*
-*escape_therapy*
+*_mrss_*.csv
+*_mrss_*.tsv
+*_mrss_*.xlsx
+*_mRSS_*.csv
+*_mRSS_*.tsv
+*_mRSS_*.xlsx
+*autoantibod*.csv
+*autoantibod*.tsv
+*autoantibod*.xlsx
+*escape_therapy*.csv
+*escape_therapy*.tsv
+*escape_therapy*.xlsx
 
 # The real manifest carries arm/timepoint per library; the TEMPLATE is tracked.
 metadata/library_manifest.csv
@@ -135,3 +143,8 @@ Thumbs.db
 screenlog.*
 nohup.out
 core.*
+
+# ---- Claude Code --------------------------------------------
+# settings.json (shared deny rules) IS tracked.
+# settings.local.json holds personal overrides and is not.
+.claude/settings.local.json

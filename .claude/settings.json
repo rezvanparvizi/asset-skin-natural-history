@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./data/**)",
+      "Read(//home/parvizi/asset-data/data/**)",
+      "Read(//hits/home/parvizi/asset/**)",
+      "Read(./metadata/clinical/**)",
+      "Read(./metadata/library_manifest.csv)",
+      "Read(./metadata/labels/**)",
+      "Read(./metadata/inherited_labels/**)",
+      "Read(**/*clinical*.csv)",
+      "Read(**/*clinical*.tsv)",
+      "Read(**/*clinical*.xlsx)"
+    ]
+  }
+}
