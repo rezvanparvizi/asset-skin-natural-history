@@ -155,7 +155,7 @@ fi
 # -S    : name the session
 # The wrapper appends an exit-status line so a failed job is obvious in
 # the log even if you were not watching.
-screen -dmS "$NAME" bash -lc "
+screen -dmS "$NAME" bash -c "
   cd '$REPO'
   { eval $RCMD ; } >> '$LOG' 2>&1
   code=\$?

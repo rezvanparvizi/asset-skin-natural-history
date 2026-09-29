@@ -82,6 +82,18 @@ cohort_samples <- function(cohort   = COHORT,
   ch  <- read_cohort(cohort)
   lib <- freeze_libraries(freeze, manifest)
 
+  # Flagged libraries (freeze library_flags) stay in Layer 1 but are
+  # never part of an inference cohort until the flag is resolved.
+  if (isTRUE(ch$layer == 2) && "design_flag" %in% names(lib)) {
+    flagged <- !is.na(lib$design_flag) & nzchar(lib$design_flag)
+    if (any(flagged)) {
+      message(sprintf("Cohort '%s': dropping %d flagged libraries (%s).",
+                      cohort, sum(flagged),
+                      paste(unique(lib$design_flag[flagged]), collapse = ", ")))
+    }
+    lib <- lib[!flagged, ]
+  }
+
   inc <- ch$include %||% list()
   for (field in names(inc)) {
     if (!field %in% names(lib)) {
@@ -283,6 +295,25 @@ save_table <- function(x, run, name) {
   f <- file.path(run$tables, paste0(name, ".csv"))
   utils::write.csv(x, f, row.names = FALSE)
   message("  wrote ", .rel_to_repo(f))
+  invisible(f)
+}
+
+#' Write a table that carries patient-level identifiers
+#'
+#' Anything with subject IDs, clinical values or barcode-level labels goes
+#' under data/patient_level/, never results/ (docs/decisions.md,
+#' 2026-09-29). The run directory gets a pointer file instead.
+save_patient_table <- function(x, run, name) {
+  stopifnot(inherits(run, "asset_run"))
+  d <- file.path(PATIENT, run$context$freeze, run$context$scope,
+                 run$stage, run$run_name)
+  dir.create(d, recursive = TRUE, showWarnings = FALSE, mode = "0700")
+  f <- file.path(d, paste0(name, ".csv"))
+  utils::write.csv(x, f, row.names = FALSE, na = "")
+  Sys.chmod(f, "0600")
+  cat(.rel_to_repo(f), "\n", file = file.path(run$tables, "PATIENT_LEVEL_TABLES.txt"),
+      append = TRUE)
+  message("  wrote ", .rel_to_repo(f), " (patient-level)")
   invisible(f)
 }
 

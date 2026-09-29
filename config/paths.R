@@ -65,6 +65,7 @@ BULK     <- file.path(DATA, "bulk")         # bulk skin + PBMC counts
 CLINICAL <- file.path(DATA, "clinical")     # DCC clinical tables — NEVER in git
 EXTERNAL <- file.path(DATA, "external")     # reference atlases for label transfer
 INHERIT  <- file.path(DATA, "inherited")    # objects copied from colleagues
+PATIENT  <- file.path(DATA, "patient_level") # run outputs carrying patient IDs — NEVER results/
 
 # ---- inside the repo (tracked) -------------------------------
 CONFIG   <- file.path(REPO, "config")

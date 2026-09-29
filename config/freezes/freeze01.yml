@@ -19,27 +19,39 @@ freeze_id: freeze01
 created: 2026-09-23
 status: active          # active | closed | superseded
 description: >
-  First-pass cohort. Excludes libraries flagged for low median genes per
-  cell pending resequencing. Includes healthy controls collected
-  simultaneously through the same 10x Flex pipeline.
+  First-pass cohort: the 221 libraries in the colleague's sample map
+  (209 SSc from 79 subjects, both arms, M00/M03/M06; 12 healthy
+  controls). freeze02 will ADD ~20 newly sequenced samples; they do not
+  replace any library here.
+
+# ---- sources -------------------------------------------------
+# Read by analysis/00_manifest_and_batch/00_0_import_raw_libraries.R,
+# which copies everything into data/raw/ with md5 verification. After
+# that, nothing downstream reads these paths.
+sources:
+  sample_map: /home/jarnagin/ASSET_Flex/results/demo.txt
+  sample_map_owner: jarnagin
+  cellranger_outputs: >
+    /hits/Johann_Novaseq/fastq/<run>/10x_analysis_<run>/Sample_<run>-Pool01
+    (SSc and 12952-JF controls); /hits/home/wasikowr/ffpe/{8911_JF,9260_JF}/outs
+    (5 controls)
 
 # ---- processing provenance -----------------------------------
-# TODO confirm every value here against the sequencing core's report
-# before interpreting any gene-level result. If this is a probe-based
-# Flex assay the panel is NOT whole-transcriptome, which constrains
-# which genes can be asked about at all.
-platform: "10x Genomics Flex"          # TODO confirm
+# Read from each pool's config.csv and web_summary.html on 2026-09-29.
+# Probe-based Flex: the panel is NOT whole-transcriptome, which
+# constrains which genes can be asked about at all.
+platform: "10x Genomics Flex"
 chemistry: "TODO"                      # TODO confirm
-probe_set: "TODO"                      # e.g. Chromium_Human_Transcriptome_Probe_Set_v1.0.1
-cellranger_version: "TODO"
-reference: "TODO"                      # e.g. refdata-gex-GRCh38-2024-A
+probe_set: "Chromium_Human_Transcriptome_Probe_Set_v1.1.0_GRCh38-2024-A"
+cellranger_version: "cellranger-9.0.1"   # verified per pool by 00_0
+reference: "refdata-gex-GRCh38-2024-A"
 fixation: "FFPE"                       # TODO confirm
 
 # ---- cohort composition --------------------------------------
 # TODO fill from the sample manifest once received
-n_libraries: null
-n_subjects_ssc: null
-n_subjects_hc: null
+n_libraries: 221
+n_subjects_ssc: 79
+n_subjects_hc: 12
 n_cells_estimate: 1300000
 
 timepoints: [M00, M03, M06]
@@ -58,6 +70,20 @@ excluded_libraries: []
 #   - library_id: LIB_0147
 #     reason: "ambient fraction > 0.4"
 #     correlated_with_design: false
+
+# ---- library flags -------------------------------------------
+# Libraries that stay in the freeze (they help define cell types in
+# Layer 1) but carry a design problem. Any flagged library is excluded
+# from every Layer-2 cohort by cohort_samples() until the flag is
+# resolved. 00_0 copies the flag into the manifest's design_flag column.
+library_flags:
+  - library_id: 13639-JF-11
+    flag: timepoint_unresolved
+    note: "Same subject as 13639-JF-12: both labelled Month 3, no Baseline.
+           One is probably a mislabelled Baseline. Ask colleague / DCC."
+  - library_id: 13639-JF-12
+    flag: timepoint_unresolved
+    note: "See 13639-JF-11."
 
 # ---- resolved membership -------------------------------------
 # Written by analysis/00_manifest_and_batch/00_1_build_manifest.R so the

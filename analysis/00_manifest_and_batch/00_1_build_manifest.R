@@ -119,7 +119,7 @@ utils::write.csv(as.data.frame(design),
                  file.path(run$tables, "design_summary.csv"),
                  row.names = FALSE)
 
-save_table(lib, run, "freeze_libraries")
+save_patient_table(lib, run, "freeze_libraries")   # has subject_id
 
 status  <- if (length(issues)) "invalid" else "ok"
 verdict <- if (length(issues)) {

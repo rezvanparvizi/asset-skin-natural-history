@@ -45,8 +45,9 @@ suppressPackageStartupMessages({
 run <- init_run(
   stage    = "00_manifest_and_batch",
   run_name = "batch_vs_design_crosstab",
-  notes    = paste("Hazard #1: is batch_id confounded with timepoint,",
-                   "arm, or group?")
+  params   = list(alpha = 0.05, cramers_v_threshold = 0.3),
+  notes    = paste("Hazard #1: is any batch candidate confounded with",
+                   "timepoint, arm, or group?")
 )
 
 # ---- 1. manifest, restricted to the freeze --------------------
@@ -99,16 +100,32 @@ test_assoc <- function(tbl, name) {
              stringsAsFactors = FALSE)
 }
 
-design_vars <- intersect(c("timepoint", "arm", "group", "run_id",
-                           "cellranger_run"), names(lib))
-design_vars <- setdiff(design_vars, "batch_id")
+# Batch candidates: every technical grouping we can reconstruct. The
+# true prep/capture batch has not been confirmed by the core, so each is
+# tested. site_id (recruiting hospital; biopsy collection and handling)
+# is added from the clinical table once it is in data/clinical/.
+batch_vars <- intersect(c("batch_id", "sample_name_date", "cellranger_run",
+                          "site_id"), names(lib))
+batch_vars <- batch_vars[vapply(batch_vars, function(b)
+  length(unique(stats::na.omit(lib[[b]]))) > 1, logical(1))]
 
-tests <- do.call(rbind, lapply(design_vars, function(v) {
-  tbl <- table(lib$batch_id, lib[[v]], useNA = "ifany")
-  utils::write.csv(as.data.frame.matrix(tbl),
-                   file.path(run$tables,
-                             sprintf("crosstab_batch_by_%s.csv", v)))
-  test_assoc(tbl, paste("batch_id vs", v))
+# Timepoint and arm are compared among SSc libraries only: healthy
+# controls have neither, and letting NA act as a fourth timepoint would
+# fold the HC-vs-SSc question into the timepoint test.
+ssc <- lib[lib$group == "SSC", ]
+design <- list(timepoint = ssc, arm = ssc, group = lib)
+
+tests <- do.call(rbind, lapply(batch_vars, function(b) {
+  do.call(rbind, lapply(names(design), function(v) {
+    d <- design[[v]]
+    tbl <- table(d[[b]], d[[v]], useNA = "ifany")
+    utils::write.csv(as.data.frame.matrix(tbl),
+                     file.path(run$tables,
+                               sprintf("crosstab_%s_by_%s.csv", b, v)))
+    out <- test_assoc(tbl, paste(b, "vs", v))
+    out$scope <- if (v == "group") "all" else "SSc only"
+    out
+  }))
 }))
 
 save_table(tests, run, "batch_association_tests")
@@ -120,60 +137,63 @@ print(tests, row.names = FALSE)
 # the good case. If subjects are split across batches, batch enters the
 # within-subject comparison directly.
 
-per_subject <- do.call(rbind, lapply(
-  split(lib, lib$subject_id), function(d) {
-    data.frame(subject_id   = d$subject_id[1],
-               group        = d$group[1],
-               arm          = if ("arm" %in% names(d)) d$arm[1] else NA,
-               n_libraries  = nrow(d),
-               n_batches    = length(unique(d$batch_id)),
-               batches      = paste(sort(unique(d$batch_id)),
-                                    collapse = ";"),
-               timepoints   = paste(sort(unique(d$timepoint)),
-                                    collapse = ";"),
-               stringsAsFactors = FALSE)
-  }))
-save_table(per_subject, run, "batch_nesting_per_subject")
+nesting <- do.call(rbind, lapply(batch_vars, function(b) {
+  per_subject <- do.call(rbind, lapply(
+    split(ssc, ssc$subject_id), function(d) {
+      data.frame(batch_var    = b,
+                 subject_id   = d$subject_id[1],
+                 arm          = d$arm[1],
+                 n_libraries  = nrow(d),
+                 n_batches    = length(unique(d[[b]])),
+                 batches      = paste(sort(unique(d[[b]])), collapse = ";"),
+                 timepoints   = paste(sort(unique(d$timepoint)), collapse = ";"),
+                 stringsAsFactors = FALSE)
+    }))
+  per_subject
+}))
+save_patient_table(nesting, run, "batch_nesting_per_subject")   # has subject_id
 
-multi <- per_subject[per_subject$n_libraries > 1, ]
-n_split <- sum(multi$n_batches > 1)
-pct_split <- if (nrow(multi)) 100 * n_split / nrow(multi) else NA
-
-message(sprintf(
-  "\nSubjects with >1 library: %d; of those, %d (%.0f%%) span multiple batches",
-  nrow(multi), n_split, pct_split))
+multi <- nesting[nesting$n_libraries > 1, ]
+nest_summary <- do.call(rbind, lapply(split(multi, multi$batch_var), function(d)
+  data.frame(batch_var = d$batch_var[1], subjects_multi = nrow(d),
+             split_across_batches = sum(d$n_batches > 1),
+             pct_split = round(100 * mean(d$n_batches > 1)),
+             stringsAsFactors = FALSE)))
+save_table(nest_summary, run, "batch_nesting_summary")
+print(nest_summary, row.names = FALSE)
 
 # ---- 4. plots -------------------------------------------------
 
-for (v in design_vars) {
-  df <- as.data.frame(table(batch = lib$batch_id, level = lib[[v]]))
-  p <- ggplot(df, aes(batch, Freq, fill = level)) +
-    geom_col(position = "stack", width = 0.8) +
-    scale_fill_manual(values = pal_asset(length(unique(df$level))),
-                      name = v) +
-    labs(title = paste("Libraries per batch, coloured by", v),
-         subtitle = sprintf("%s: p = %s, Cramer's V = %s",
-                            tests$test[tests$comparison ==
-                                         paste("batch_id vs", v)],
-                            signif(tests$p_value[tests$comparison ==
-                                                   paste("batch_id vs", v)], 3),
-                            signif(tests$cramers_v[tests$comparison ==
-                                                     paste("batch_id vs", v)], 2)),
-         x = "batch_id", y = "libraries") +
-    theme_asset() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  save_plot(p, run, paste0("QC_batch_by_", v), qc = TRUE,
-            width = 7, height = 3.5)
+for (b in batch_vars) {
+  for (v in names(design)) {
+    d  <- design[[v]]
+    df <- as.data.frame(table(batch = d[[b]], level = d[[v]], useNA = "ifany"))
+    tr <- tests[tests$comparison == paste(b, "vs", v), ]
+    p <- ggplot(df, aes(batch, Freq, fill = level)) +
+      geom_col(position = "stack", width = 0.8) +
+      scale_fill_manual(values = pal_asset(length(unique(df$level))),
+                        name = v) +
+      labs(title = sprintf("Libraries per %s, coloured by %s (%s)",
+                           b, v, tr$scope),
+           subtitle = sprintf("%s: p = %s, Cramer's V = %s", tr$test,
+                              signif(tr$p_value, 3), signif(tr$cramers_v, 2)),
+           x = b, y = "libraries") +
+      theme_asset() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    save_plot(p, run, sprintf("QC_%s_by_%s", b, v), qc = TRUE,
+              width = 7, height = 3.5)
+  }
 }
 
 p_nest <- ggplot(multi, aes(factor(n_batches))) +
   geom_bar(fill = "#4C72B0", width = 0.7) +
-  labs(title = "Batches per subject (subjects with >1 library)",
+  facet_wrap(~ batch_var) +
+  labs(title = "Batches per subject (SSc subjects with >1 library)",
        subtitle = "1 = batch nested in subject (good); >1 = batch enters the within-subject comparison",
        x = "distinct batches", y = "subjects") +
   theme_asset()
 save_plot(p_nest, run, "QC_batch_nesting_per_subject", qc = TRUE,
-          width = 4, height = 3)
+          width = 6, height = 3)
 
 # ---- 5. verdict -----------------------------------------------
 
@@ -187,8 +207,8 @@ flagged <- tests[!is.na(tests$p_value) &
 verdict_lines <- c(
   sprintf("Freeze: %s | %d libraries | %d subjects",
           FREEZE, nrow(lib), length(unique(lib$subject_id))),
-  sprintf("Subjects spanning multiple batches: %d of %d (%.0f%%)",
-          n_split, nrow(multi), pct_split),
+  "Batch nesting within subject (SSc, subjects with >1 library):",
+  utils::capture.output(print(nest_summary, row.names = FALSE)),
   "",
   "Associations tested:",
   utils::capture.output(print(tests, row.names = FALSE)),

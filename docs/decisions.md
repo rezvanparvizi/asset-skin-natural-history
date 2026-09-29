@@ -100,3 +100,82 @@ Limitation: deny rules are a guardrail, not a security boundary. The
 folder convention is what makes them work.
 
 
+
+## 2026-09-29 — Raw data: copy, not symlink
+
+Decision: every library's CellRanger output is copied into data/raw/
+by analysis/00_manifest_and_batch/00_0_import_raw_libraries.R, md5-
+verified against the source, and made read-only. Checksums in
+data/raw/checksums.csv. Per library: sample_filtered and sample_raw
+feature matrices (.h5) and metrics_summary.csv; per pool: the pool raw
+matrix and config.csv. BAMs and molecule_info are not copied.
+
+Rejected: symlinking to /hits. The upstream files belong to other
+people and have already changed once (wasikowr's seurat.RDS rewritten
+2026-09-02, after the colleague's objects were built from it). A
+symlinked freeze can change silently. Cost of copying is ~12 GB.
+
+## 2026-09-29 — Batch candidates for hazard #1
+
+The core has not confirmed a prep/capture batch, so every technical
+grouping that can be reconstructed is tested against timepoint, arm
+(SSc only) and group:
+
+- batch_id = sequencing-core run (e.g. 13452-JF). Each is one 10x Flex
+  pool of up to 16 probe-barcoded samples = one GEM capture, so it is
+  the most plausible capture batch and shares one ambient profile.
+- sample_name_date = the YYMMDD prefix of the sample name (9 dates,
+  2025-04-22 .. 05-30, each spanning 1-3 pools). Meaning unconfirmed
+  (fixation? hybridisation?), so stored under a neutral name.
+- cellranger_run.
+- site_id (recruiting hospital; biopsy collection and handling) — added
+  from the clinical table once it is in data/clinical/. Site cannot
+  confound timepoint (every patient has all timepoints) but can
+  confound arm, pool, and later improver status.
+
+Rejected: the colleague's `batch` column, which is unique per sample
+and therefore not a batch.
+
+Known before running: all 12 healthy controls were captured in their
+own pools (12952-JF, 8911-JF, 9260-JF), so SSc-vs-HC differences are
+partly technical by construction.
+
+## 2026-09-29 — Ambient RNA: redo SoupX; keep raw counts as the base layer
+
+Decision: raw integer counts stay the canonical `counts` layer, because
+a correction can be redone from raw but never undone. SoupX is re-run
+here from each library's sample_raw_feature_bc_matrix.h5, output with
+`roundToInt = TRUE` (stochastic rounding, preserves expected totals) as
+a separate layer. Clustering/annotation use the corrected layer;
+pseudobulk DE uses corrected counts with raw counts as a sensitivity
+analysis, because ambient fraction may differ by timepoint.
+
+Rejected: (a) round() on wasikowr's non-integer corrected matrix —
+deterministic rounding is biased for the many small corrected values,
+and her per-sample rho is undocumented; (b) raw counts only, as the
+colleague did — reintroduces the contamination SoupX removed.
+
+Open, decide at stage 04 BEFORE looking at outcome: how rho is set.
+The colleague tuned 0.1-0.25 by eye per sample. Whatever rule is used
+must be written here first, judged on marker leakage (e.g. keratin /
+collagen / HBB in immune cells), identical for every library, and never
+revisited with improver status in view.
+
+## 2026-09-29 — Patient-level run outputs go to data/patient_level/
+
+Any run output carrying subject IDs (the generated manifest, per-subject
+tables) is written by save_patient_table() to
+data/patient_level/<freeze>/<scope>/<stage>/<run_name>/, mode 600; the
+run's tables/ gets a pointer file. results/ holds only library-level
+technical data, counts and summaries.
+
+Why: the data-access rule above says patient-level tables never live in
+results/, and the scaffold's 00_1 / 00_2 had been writing
+subject-level tables there.
+
+## 2026-09-29 — jobs/run.sh launches with bash -c, not bash -lc
+
+The screen wrapper used `bash -lc`, contradicting AGENTS.md: a login
+shell sources .bashrc and can re-activate conda (ENVIRONMENT.md
+workaround 1). Changed to `bash -c`; screen inherits PATH from the
+launching shell.
