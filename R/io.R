@@ -82,6 +82,15 @@ cohort_samples <- function(cohort   = COHORT,
   ch  <- read_cohort(cohort)
   lib <- freeze_libraries(freeze, manifest)
 
+  inc <- ch$include %||% list()
+  for (field in names(inc)) {
+    if (!field %in% names(lib)) {
+      stop("Cohort '", cohort, "' filters on '", field,
+           "' which is not a manifest column.", call. = FALSE)
+    }
+    lib <- lib[lib[[field]] %in% unlist(inc[[field]]), ]
+  }
+
   # Flagged libraries (freeze library_flags) stay in Layer 1 but are
   # never part of an inference cohort until the flag is resolved.
   if (isTRUE(ch$layer == 2) && "design_flag" %in% names(lib)) {
@@ -92,15 +101,6 @@ cohort_samples <- function(cohort   = COHORT,
                       paste(unique(lib$design_flag[flagged]), collapse = ", ")))
     }
     lib <- lib[!flagged, ]
-  }
-
-  inc <- ch$include %||% list()
-  for (field in names(inc)) {
-    if (!field %in% names(lib)) {
-      stop("Cohort '", cohort, "' filters on '", field,
-           "' which is not a manifest column.", call. = FALSE)
-    }
-    lib <- lib[lib[[field]] %in% unlist(inc[[field]]), ]
   }
 
   if (isTRUE(ch$exclude_post_escape)) {

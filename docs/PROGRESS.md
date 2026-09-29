@@ -9,21 +9,47 @@ organised; this says where we are.
 items to Done, revise In flight, add anything newly blocked. If it goes stale
 it becomes worse than nothing, because it will be believed.
 
-Last updated: **2026-09-28** · Updated by: Rezvan Parvizi
+Last updated: **2026-09-29** · Updated by: Rezvan Parvizi (with Claude Code)
 
 ---
 
 ## Current focus
 
 **Project 1** — molecular basis of spontaneous mRSS improvement in the ASSET
-placebo arm. Infrastructure is complete; the next work is data-facing.
-
-Nothing is in flight right now. The environment build finished 2026-09-28 and
-the repository is committed and pushed.
+placebo arm. Stage 00 is done for freeze01. Next are the clinical table and
+the meeting with colleagues about the data issues, then stage 03 (QC).
 
 ---
 
 ## Done
+
+### Stage 00 — freeze01 (2026-09-29)
+
+- **R0001 `import_raw_libraries`.** 221 libraries (209 SSc from 79
+  subjects, 12 HC) in 17 pools. 697 files (12.2 GB) copied into
+  `data/raw/`, md5-verified and read-only. Manifest generated.
+- **R0002 `build_manifest`.** Structural checks pass. `placebo_all` = 107
+  libraries from 39 subjects; `basectrl` = 72.
+- **R0003 `batch_vs_design_crosstab`.** Read its `VERDICT.txt`.
+  - Pool vs **timepoint: independent** (p = 1.0, V = 0.15). The
+    longitudinal design is clean.
+  - Pool vs **arm**: p = 0.02, V = 0.34, driven by 13678-DP / 13679-DP.
+    Irrelevant within placebo; matters for any arm comparison.
+  - Pool vs **group (HC)**: V = 1. The controls are in their own pools
+    (CellRanger 9.0.0 and forced cell counts for 5 of them). SSc-vs-HC
+    differences are partly technical.
+  - 23 of 74 multi-sample subjects (31%) span more than one pool, so pool
+    enters within-subject contrasts. Plan: pool as a covariate in
+    pseudobulk models. Not yet recorded as a decision.
+- Library flags: `13639-JF-11` and `-12` are `timepoint_unresolved` (same
+  subject, both labelled M03, no M00). Kept for Layer 1, excluded from all
+  cohorts.
+- **Sample sheets for building the clinical table** (patient-level):
+  `data/patient_level/freeze01/reference/00_manifest_and_batch/import_raw_libraries/`
+  `sample_sheet_per_library.csv` and `sample_sheet_per_subject.csv`
+- **Discussion list for colleagues:** `docs/data_issues_freeze01.md`
+  (controls, pools, 16 unmapped libraries, the timepoint flag, 6 metric
+  outliers, the upstream object, code points to pass on).
 
 ### Environment (complete, verified)
 
@@ -71,8 +97,10 @@ Nothing. Clean stopping point.
 
 | What | Waiting on | Why it matters |
 |---|---|---|
-| **Library manifest** with `batch_id` | whoever generated the libraries | Hazard #1. `analysis/00_manifest_and_batch/` cannot run without it, and no longitudinal result is trustworthy until batch is checked against timepoint and arm. |
-| **Platform / chemistry / probe set** confirmation | sequencing core | If it is probe-based 10x Flex, the panel is not whole-transcriptome — that constrains which genes can be asked about at all. `config/freezes/freeze01.yml` has these as `TODO`. |
+| **Meaning of pool and sample-name date** | sequencing core / Jarnagin | batch_id is currently the pool (the best available stand-in). Confirm it is the capture batch. |
+| **Site ID per patient** | owner, from the clinical table | Adds site to the batch check (00_2 picks up `site_id` automatically). |
+| **Which of 13639-JF-11/-12 is Baseline** | Jarnagin / DCC | Both are excluded from cohorts until resolved. |
+| **Chemistry / fixation** confirmation | sequencing core | Probe set (v1.1.0), CellRanger (9.0.1; 9.0.0 for 5 controls) and reference are confirmed. Chemistry and fixation are still TODO in freeze01.yml. |
 | **Clinical table** from the U-M DCC | DCC | Needed for cohort censoring (`placebo` drops post-escape samples), and for every model's covariates. |
 | **Colleague's label tables** (barcode → lineage/celltype/subtype) | Jarnagin | Preferred over inheriting her Seurat objects; decouples us from her ongoing iteration. Questions listed in `docs/inherited_objects.md`. |
 | **Which of her objects is current** | Jarnagin | `res0p2` / `res0p3` / `from3b` / `_v2` / `Round1` / `Round2` cannot be resolved from filenames. |
@@ -84,23 +112,21 @@ Nothing. Clean stopping point.
 
 ## Next up, in order
 
-1. **Storage setup.** `./setup.sh /home/parvizi/asset-data`, then
-   `Rscript R/paths_check.R`. Creates the `data/`, `results/`, `figures/`,
-   `logs/` symlinks and locks `data/clinical/` to mode 700.
-2. **Backfill `docs/decisions.md`** with the environment decisions. The
-   reasoning currently lives in `ENVIRONMENT.md` and in chat history, not in
-   the dated decision log.
-3. **Bulk skin — stage 01.** The only modality available today. GSE217067
-   with the intrinsic-subset calls and CD28 module scores from Mehta 2022.
-   Reproduce the subset assignments, then the placebo-arm trajectory. This is
-   also the material the owner knows best, so it is the natural first real
-   analysis.
-4. **Backup script.** `rsync` tiers to `/hits/home/parvizi/asset`. The Dropbox
-   leg waits on the folder convention.
-5. **Manifest and batch check — stage 00.** The moment the manifest arrives,
-   this runs before any biology. Read its `VERDICT.txt`.
-6. **Python envs.** `scripts/bootstrap_python.sh` for scVI, TCAT, Scaden.
-   Deferred until the R side has been used in anger.
+1. **Clinical table.** The owner builds it against the sample sheets and
+   puts it in `data/clinical/`. It must include site ID and the
+   escape-therapy start month. Then re-run 00_2 to add site.
+2. **Colleague meeting** on `docs/data_issues_freeze01.md`. Record the
+   answers in `docs/decisions.md`.
+3. **Stage 03: QC** per library from `data/raw/*/*/sample_filtered_feature_bc_matrix.h5`.
+   The 6 CellRanger outliers are already flagged.
+4. **Stage 04: SoupX** from the sample_raw matrices. Write the rho rule
+   in decisions.md BEFORE running it (see the 2026-09-29 entry).
+5. Decide the doublet route (scDblFinder is blocked).
+6. freeze02 (~20 new samples, about a month away): add them with a new
+   `freeze02.yml` and re-run everything. Hold the expensive manual
+   subtype annotation (stages 07–10) until then.
+7. Deferred from before: backfill environment decisions; backup script;
+   bulk skin stage 01 once the owner has placed the inputs.
 
 ---
 
@@ -126,6 +152,10 @@ invalidation in her tree, where an annotation change retroactively invalidated
 downstream results. Building fresh gives a clean documented reference layer
 both could share. **Worth agreeing a single versioned canonical label set with
 her before either of us has a figure.**
+
+**How rho is set for SoupX.** The colleague tuned 0.1–0.25 by eye per
+sample. Write a rule first (marker-leakage criteria, the same for every
+library, never judged with improver status in view). **Not yet decided.**
 
 **Doublet detection route.** `scDblFinder` is blocked by the gcc 9 / C++20
 ceiling. Options: `DoubletFinder`, `scds`, or inherit her existing calls (she
@@ -177,4 +207,9 @@ Detail belongs in `docs/decisions.md` (judgment) and `docs/runs.csv` (runs).
             "all", not "explicit". 277 packages now locked and committed.
             Analysis stages reordered to metadata -> bulk -> single cell.
             docs/ENVIRONMENT.md rewritten with all six workarounds.
+2026-09-29  Surveyed colleague's ASSET_Flex tree (read-only). Stage 00
+            built: raw copied + md5 (R0001), manifest (R0002), batch
+            check (R0003: timepoint clean, HC fully confounded with
+            pool). Patient-level outputs moved to data/patient_level/.
+            Discussion list for colleagues written.
 ```
