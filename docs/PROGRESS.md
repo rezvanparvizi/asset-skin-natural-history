@@ -145,9 +145,11 @@ Nothing running. Waiting on the owner's go-ahead for the integration plan.
 4. **Colleague meeting** on `docs/data_issues_freeze01.md`.
 5. Bulk skin: needs the column -> Subject_ID/timepoint map (no sample
    sheet in data/bulk/skin) and which gene-symbol matrix is canonical.
-6. freeze02 (~20 new samples, about a month away): add them with a new
-   `freeze02.yml` and re-run everything. Hold the expensive manual
-   subtype annotation (stages 07–10) until then.
+6. freeze02: 23 newer libraries ALREADY exist (wasikowr, processed Aug
+   2026; see data_issues_freeze01.md). 21 are repeats of low-yield
+   freeze01 libraries, 2 are unidentified. Waiting on wasikowr's sample
+   sheet; then `freeze02.yml` (00_0 must handle the flat CellRanger
+   layout) and decide merge_strategy per repeated biopsy.
 7. Deferred from before: backfill environment decisions; backup script;
    bulk skin stage 01 once the owner has placed the inputs.
 

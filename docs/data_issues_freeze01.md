@@ -156,3 +156,21 @@ subset bug in jarnagin's 1a_Baseline.R (baseline object holds about half
 the cells), the SFPR4 typo, wasikowr's clustering on the UMAP, and
 Harmony on `subject`. Also ask wasikowr for her top-level marker list
 and SoupX settings.
+
+## 23 newer libraries already processed by wasikowr (found 2026-10-01)
+
+wasikowr's seurat.RDS (2 Sep) has 242 samples: our 219 plus 23 newer
+libraries, listed in /hits/home/wasikowr/ffpe/Asset/firstrun/asset_batch5.csv
+(sampleID, path, batch = original sample number, condition). CellRanger
+outputs (re-run by wasikowr, Aug 2026; flat per_sample_outs layout, no
+count/ subfolder): /hits/home/wasikowr/ffpe/{14794,15195,15231,15242}-JF_v1/.
+
+- 21 are repeats of freeze01 libraries (matched by sample number), mostly
+  low-yield originals (~1,000-2,000 cells). Same biopsy -> a second
+  library_id for one sample_id; merge_strategy decision needed.
+- 2 (sample numbers 32 and 68) have no original in our sample map.
+  Subject/timepoint unknown — ask wasikowr.
+- None repeats our 3 failed libraries.
+These are freeze02 material. Asked wasikowr (Slack, 2026-10-01) for a
+sample sheet for all 242 samples, CellRanger paths, per-cell labels and
+how many samples are still waiting to be sequenced.
