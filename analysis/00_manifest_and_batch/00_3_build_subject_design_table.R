@@ -193,7 +193,8 @@ write_design(design, "subject_design")
 
 ssc <- design[design$group == "SSc", ]
 ssc$mRSS_category[is.na(ssc$mRSS_category)] <- "(missing)"
-save_table(as.data.frame.matrix(table(ssc$mRSS_category, ssc$arm)), run,
+cat_by_arm <- as.data.frame.matrix(table(ssc$mRSS_category, ssc$arm))
+save_table(cbind(mRSS_category = rownames(cat_by_arm), cat_by_arm), run,
            "mrss_category_by_arm")
 sc_counts <- do.call(rbind, lapply(split(ssc, ssc$arm), function(d)
   data.frame(arm = d$arm[1], subjects = nrow(d),
