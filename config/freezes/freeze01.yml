@@ -49,7 +49,7 @@ fixation: "FFPE"                       # TODO confirm
 
 # ---- cohort composition --------------------------------------
 # TODO fill from the sample manifest once received
-n_libraries: 221
+n_libraries: 218                       # 221 imported - 3 failed (excluded_libraries)
 n_subjects_ssc: 79
 n_subjects_hc: 12
 n_cells_estimate: 1300000
@@ -62,7 +62,19 @@ groups: [SSc, HC]
 # One entry per excluded library, with a reason. If a library is
 # excluded for a reason correlated with arm or timepoint, flag it: that
 # is informative missingness, not just a QC problem.
-excluded_libraries: []
+excluded_libraries:
+  # Failed libraries (cell QC R0013; owner decision 2026-10-01). One per
+  # timepoint, so not obviously design-correlated; candidates for the
+  # resequencing that becomes freeze02.
+  - library_id: 13718-JF-14
+    reason: "cell calling failed: 87,685 barcodes, median 3 UMI/cell, 0 pass QC"
+    correlated_with_design: false
+  - library_id: 13719-JF-10
+    reason: "failed: 1,144 barcodes, median 7 UMI/cell, 0 pass QC"
+    correlated_with_design: false
+  - library_id: 13596-JF-9
+    reason: "cell calling failed: 17,557 barcodes, median 107 UMI/cell, 127 pass QC"
+    correlated_with_design: false
 # Example:
 #   - library_id: LIB_0113
 #     reason: "median genes/cell < 400"
@@ -84,6 +96,16 @@ library_flags:
   - library_id: 13639-JF-12
     flag: timepoint_unresolved
     note: "See 13639-JF-11."
+
+# ---- QC review (informational) --------------------------------
+# Weak libraries KEPT in the freeze and in cohorts (owner decision
+# 2026-10-01), listed so any result can be checked without them. Not
+# read by cohort_samples(); unlike library_flags they do not exclude.
+qc_review_libraries:
+  - {library_id: 13481-JF-8,  note: "492 of 1,025 cells pass; weak library"}
+  - {library_id: 13719-JF-7,  note: "3,123 of 6,256 pass; shallow (median 500 UMI), floor removes half"}
+  - {library_id: 8911-JF-14,  note: "HC; 174 of 490 pass; forced-cells re-run"}
+  - {library_id: 9260-JF-16,  note: "HC; 274 of 1,000 pass; forced-cells re-run"}
 
 # ---- resolved membership -------------------------------------
 # Written by analysis/00_manifest_and_batch/00_1_build_manifest.R so the

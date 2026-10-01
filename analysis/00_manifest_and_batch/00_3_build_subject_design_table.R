@@ -4,7 +4,8 @@
 # One row per subject: the design fields every later stage joins on.
 #
 #   Subject_ID, group, arm, mRSS_category, Ever_escaped, Escape_month,
-#   scRNA-seq timepoints present, bulk skin / bulk PBMC availability
+#   scRNA-seq timepoints present (freeze libraries only) and their
+#   library IDs, bulk skin / bulk PBMC availability
 #
 # Written to metadata/design/ (gitignored). By the owner's decision
 # (docs/decisions.md, 2026-10-01) this table — and only this table — is
@@ -108,7 +109,9 @@ clin$Escape_month <- esc_num
 
 # ---- 2. scRNA-seq availability, from the manifest ------------
 
-man <- read_manifest()
+# Libraries in the freeze (excluded_libraries removed), not the whole
+# manifest: a failed library is not an available timepoint.
+man <- freeze_libraries()
 ssc_lib <- man[man$group == "SSc", ]
 hc_lib  <- man[man$group == "HC", ]
 
@@ -119,6 +122,9 @@ sc_avail <- do.call(rbind, lapply(split(ssc_lib, ssc_lib$Subject_ID), function(d
              sc_M00 = any(d$timepoint == "M00" & ok),
              sc_M03 = any(d$timepoint == "M03" & ok),
              sc_M06 = any(d$timepoint == "M06" & ok),
+             sc_M00_library = paste(d$library_id[d$timepoint == "M00"], collapse = ";"),
+             sc_M03_library = paste(d$library_id[d$timepoint == "M03"], collapse = ";"),
+             sc_M06_library = paste(d$library_id[d$timepoint == "M06"], collapse = ";"),
              sc_n_libraries = nrow(d),
              sc_flagged     = paste(unique(d$design_flag[!ok]), collapse = ";"),
              stringsAsFactors = FALSE)
@@ -173,6 +179,9 @@ design <- data.frame(Subject_ID    = clin$Subject_ID,
                      stringsAsFactors = FALSE)
 k <- match(design$Subject_ID, sc_avail$Subject_ID)
 for (cl in c("sc_M00", "sc_M03", "sc_M06")) design[[cl]] <- !is.na(k) & sc_avail[[cl]][k] %in% TRUE
+for (cl in paste0(c("sc_M00", "sc_M03", "sc_M06"), "_library")) {
+  design[[cl]] <- ifelse(is.na(k), "", sc_avail[[cl]][k])
+}
 design$sc_n_libraries <- ifelse(is.na(k), 0L, sc_avail$sc_n_libraries[k])
 design$sc_flagged     <- ifelse(is.na(k), "", sc_avail$sc_flagged[k])
 design$bulk_skin      <- NA
@@ -181,7 +190,8 @@ design$bulk_pbmc_M00  <- NA
 hc <- data.frame(Subject_ID = unique(hc_lib$Subject_ID), group = "HC",
                  arm = NA, mRSS_category = NA, Ever_escaped = NA,
                  Escape_month = NA, sc_M00 = FALSE, sc_M03 = FALSE,
-                 sc_M06 = FALSE, sc_n_libraries = NA, sc_flagged = "",
+                 sc_M06 = FALSE, sc_M00_library = "", sc_M03_library = "",
+                 sc_M06_library = "", sc_n_libraries = NA, sc_flagged = "",
                  bulk_skin = NA, bulk_pbmc_M00 = NA, stringsAsFactors = FALSE)
 hc$sc_n_libraries <- as.integer(table(hc_lib$Subject_ID)[hc$Subject_ID])
 

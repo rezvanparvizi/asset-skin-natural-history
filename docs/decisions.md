@@ -296,3 +296,17 @@ Rejected: (A) one fixed threshold for all libraries — depth differs
 widely between pools (6 CellRanger outliers, forced-cell HC re-runs),
 so a fixed cut makes pool decide which cells survive; (B) MAD alone —
 a uniformly poor library has a poor median and keeps its junk.
+
+## 2026-10-01 — freeze01 library exclusions after cell QC (R0013)
+
+Excluded (freeze01.yml excluded_libraries): 13718-JF-14 (M00),
+13719-JF-10 (M06), 13596-JF-9 (M03). Cell calling failed (median 3, 7
+and 107 UMI per barcode); 0, 0 and 127 cells pass QC. One per timepoint,
+so not design-correlated. freeze01 = 218 libraries.
+
+Kept, listed under qc_review_libraries (owner decision): 13481-JF-8,
+13719-JF-7 and HC 8911-JF-14, 9260-JF-16. Their passing cells are used
+everywhere; any result can be re-checked without them.
+
+Rejected: keeping 13596-JF-9's 127 passing cells — too few to represent
+a biopsy, and drawn from a library whose cell calling failed.
