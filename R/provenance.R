@@ -101,7 +101,7 @@ REGISTRY_COLS <- c("run_id", "date", "freeze", "cohort", "labelset",
 #' @param notes One-line human description of intent.
 #' @param freeze,cohort,labelset Run context. Default to the values in
 #'   config/paths.R, which jobs/run.sh sets from the command line.
-#' @param overwrite If FALSE (default) and the run directory already
+#' @param overwrite If FALSE (default; TRUE when ASSET_OVERWRITE=1) and the run directory already
 #'   exists and is non-empty, stop. Prevents silently clobbering a
 #'   previous result.
 #' @param exploratory Mark this run as Layer 3. Forces the cohort
@@ -117,7 +117,7 @@ init_run <- function(stage,
                      freeze      = FREEZE,
                      cohort      = COHORT,
                      labelset    = LABELSET,
-                     overwrite   = FALSE,
+                     overwrite   = identical(Sys.getenv("ASSET_OVERWRITE"), "1"),
                      exploratory = FALSE) {
 
   stopifnot(is.character(stage), length(stage) == 1,
