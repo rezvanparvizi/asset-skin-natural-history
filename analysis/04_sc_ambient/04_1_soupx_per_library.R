@@ -103,6 +103,22 @@ read_h5 <- function(f) {
   m
 }
 
+# The filtered (cells) and raw (droplets) matrices do not always carry the
+# same gene list. Keep the shared genes in the filtered order and report
+# the difference; stop if more than 5% of either list is unmatched.
+align_genes <- function(toc, tod, lib) {
+  common <- intersect(rownames(toc), rownames(tod))
+  if (length(common) < 0.95 * max(nrow(toc), nrow(tod))) {
+    stop(lib, ": only ", length(common), " shared genes (filtered ", nrow(toc),
+         ", raw ", nrow(tod), ")")
+  }
+  diff <- data.table(library_id = lib, n_genes_filtered = nrow(toc),
+                     n_genes_raw = nrow(tod), n_genes_shared = length(common),
+                     only_in_filtered = paste(setdiff(rownames(toc), common), collapse = ";"),
+                     only_in_raw = paste(head(setdiff(rownames(tod), common), 50), collapse = ";"))
+  list(toc = toc[common, , drop = FALSE], tod = tod[common, , drop = FALSE], diff = diff)
+}
+
 frac_of <- function(m, genes, cells) {
   g <- intersect(genes, rownames(m))
   if (!length(g) || !length(cells)) return(NA_real_)
@@ -148,7 +164,8 @@ estimate_library <- function(i) {
   tod <- read_h5(file.path(d, "sample_raw_feature_bc_matrix.h5"))
   keep <- qc$barcode[qc$library_id == lib]
   toc <- toc[, colnames(toc) %in% keep, drop = FALSE]
-  stopifnot(identical(rownames(toc), rownames(tod)), ncol(toc) == length(keep))
+  stopifnot(ncol(toc) == length(keep))
+  al <- align_genes(toc, tod, lib); toc <- al$toc; tod <- al$tod
 
   cl <- cluster_library(toc)
   sc <- SoupChannel(tod, toc, calcSoupProfile = TRUE)
@@ -160,7 +177,10 @@ estimate_library <- function(i) {
 
   soup <- sc$soupProfile
   top  <- head(soup[order(-soup$est), , drop = FALSE], 20)
+  message(sprintf("  pass 1 done: %s (%d cells, rho_auto %s)", lib, ncol(toc),
+                  format(round(est, 3))))
   list(
+    gene_diff = al$diff,
     lib = lib,
     cells = data.table(library_id = lib, barcode = colnames(toc),
                        soupx_cluster = cl$cluster, coarse_lineage = cl$lineage),
@@ -201,6 +221,7 @@ est[, rho_source := ifelse(rho_accepted, "autoEstCont",
                                   "pool_median (auto out of bounds)"))]
 cells <- rbindlist(lapply(p1, `[[`, "cells"))
 soup_top <- rbindlist(lapply(p1, `[[`, "soup_top"))
+gene_diff <- rbindlist(lapply(p1, `[[`, "gene_diff"))
 rm(p1); invisible(gc())
 
 # ---- pass 2: correct, write matrices, leakage metrics --------
@@ -212,6 +233,7 @@ correct_library <- function(i) {
   tod <- read_h5(file.path(d, "sample_raw_feature_bc_matrix.h5"))
   cl  <- cells[library_id == lib]
   toc <- toc[, cl$barcode, drop = FALSE]
+  al  <- align_genes(toc, tod, lib); toc <- al$toc; tod <- al$tod
   rho <- est$rho_used[est$library_id == lib]
 
   sc <- SoupChannel(tod, toc, calcSoupProfile = TRUE)
@@ -219,6 +241,7 @@ correct_library <- function(i) {
   sc <- setContaminationFraction(sc, rho, forceAccept = TRUE)
   out <- adjustCounts(sc, roundToInt = SX$round_to_int, verbose = 0)
   stopifnot(all(out@x == round(out@x)), identical(dim(out), dim(toc)))
+  message(sprintf("  pass 2 done: %s (rho %.3f)", lib, rho))
 
   cid <- paste(lib, colnames(toc), sep = "_")
   write_one <- function(m, root) {
@@ -287,6 +310,7 @@ setorder(est, batch_id, library_id)
 save_table(est, run, "soupx_per_library")
 save_table(leak[, !c("total_raw", "total_soupx")], run, "leakage_per_library")
 save_table(soup_top, run, "soup_top_genes")
+save_table(gene_diff, run, "gene_lists_filtered_vs_raw")
 
 # (a) rho vs design, SSc libraries
 ssc <- est[group == "SSc"]
@@ -353,6 +377,9 @@ flagged <- est[nzchar(review_flag)]
 top_soup <- head(soup_top[rank <= 5, .N, by = gene][order(-N)], 10)
 summary_lines <- c(
   sprintf("Libraries: %d   cells: %s", nrow(est), format(nrow(cells), big.mark = ",")),
+  sprintf("Genes shared filtered/raw: %s (libraries with a difference: %d)",
+          paste(unique(range(gene_diff$n_genes_shared)), collapse = "-"),
+          sum(gene_diff$n_genes_shared < pmax(gene_diff$n_genes_filtered, gene_diff$n_genes_raw))),
   sprintf("rho: median %.3f, range %.3f-%.3f; from autoEstCont %d, pool median %d",
           stats::median(est$rho_used), min(est$rho_used), max(est$rho_used),
           sum(est$rho_source == "autoEstCont"), sum(est$rho_source != "autoEstCont")),
