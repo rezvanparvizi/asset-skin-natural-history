@@ -291,6 +291,28 @@ load_object <- function(path, check = TRUE) {
 
 # ---- small utilities -----------------------------------------
 
+#' Map raw treatment values onto publication spelling
+#'
+#' Placebo / Abatacept, never all caps (docs/decisions.md, 2026-10-01).
+#' Unrecognised values become NA; callers assert on that.
+arm_label <- function(x) {
+  lab <- c(placebo = "Placebo", abatacept = "Abatacept")
+  unname(lab[tolower(trimws(as.character(x)))])
+}
+
+#' Read the subject design table (metadata/design/subject_design.csv)
+#'
+#' One row per subject: arm, mRSS_category, escape, and which timepoints
+#' and modalities exist. Written by 00_3_build_subject_design_table.R.
+read_design <- function(path = file.path(DESIGN, "subject_design.csv")) {
+  if (!file.exists(path)) {
+    stop("Design table not found: ", path, "\nRun ",
+         "analysis/00_manifest_and_batch/00_3_build_subject_design_table.R.",
+         call. = FALSE)
+  }
+  utils::read.csv(path, stringsAsFactors = FALSE)
+}
+
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
 # Defined in R/provenance.R. Fallback here so io.R also works standalone.

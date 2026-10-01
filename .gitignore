@@ -148,3 +148,7 @@ core.*
 # settings.json (shared deny rules) IS tracked.
 # settings.local.json holds personal overrides and is not.
 .claude/settings.local.json
+# Subject design table (Subject_ID, arm, mRSS_category, escape, data
+# availability). Readable by AI agents by the owner's decision
+# (docs/decisions.md, 2026-10-01), but still never committed.
+metadata/design/

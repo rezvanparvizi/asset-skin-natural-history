@@ -215,3 +215,25 @@ for the DCC.
 
 `mRSS_category` levels: Improver / Worsened / Stable / Set_aside.
 Definitions still to be recorded in data_dictionary.md.
+
+## 2026-10-01 — Subject design table readable by AI agents
+
+The owner decided that AI agents may see Subject_ID, treatment arm,
+mRSS_category, Ever_escaped, Escape_month, and which timepoints and
+modalities each subject has (these are published for this trial). They
+are extracted by 00_3_build_subject_design_table.R into metadata/design/
+(gitignored, mode 600), outside the data/ tree the agent deny rules
+cover. The clinical master table itself, and every other clinical
+column (age, sex, site, visit days, serology, lung function), stay
+unreadable.
+
+Rejected: lifting the deny rule on data/clinical/ — exposes
+quasi-identifiers that no analysis step needs an agent to see; and
+pasting values into the chat by hand — slow, and not reproducible.
+
+Open for the owner: confirm the data use agreement permits sending
+these fields to the AI service.
+
+mRSS_category calls may be revised by the owner/PI later. Every stage
+reads them from the design table at run time, so a revision means
+re-running 00_3 and the downstream plots, not editing scripts.

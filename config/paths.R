@@ -66,12 +66,14 @@ CLINICAL <- file.path(DATA, "clinical")     # DCC clinical tables — NEVER in g
 EXTERNAL <- file.path(DATA, "external")     # reference atlases for label transfer
 INHERIT  <- file.path(DATA, "inherited")    # objects copied from colleagues
 PATIENT  <- file.path(DATA, "patient_level") # run outputs carrying patient IDs — NEVER results/
+CLINICAL_MASTER <- file.path(CLINICAL, "ASSET_clinical_data_master_subject_based.xlsx")
 
 # ---- inside the repo (tracked) -------------------------------
 CONFIG   <- file.path(REPO, "config")
 METADATA <- file.path(REPO, "metadata")
 GENESETS <- file.path(METADATA, "gene_sets")
 LABELS   <- file.path(METADATA, "labels")
+DESIGN   <- file.path(METADATA, "design")    # subject design table — gitignored, readable by AI agents
 DOCS     <- file.path(REPO, "docs")
 RFUN     <- file.path(REPO, "R")
 PIPELINE <- file.path(REPO, "pipelines")

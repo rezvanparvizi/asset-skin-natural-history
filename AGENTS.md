@@ -422,7 +422,12 @@ rather than importing a testing framework.
 - If a task seems to require patient-level data, stop and ask. Work from
   the column names or the TEMPLATE files instead.
 - Do not propose moving patient-level tables into results/ or any other
-  readable folder.
+  readable folder. The one exception is metadata/design/ (owner's
+  decision, docs/decisions.md 2026-10-01): AI agents may read the subject
+  design table there (Subject_ID, arm, mRSS_category, Ever_escaped,
+  Escape_month, timepoints and modalities per subject), the ID-match
+  report, and the bulk file-name inventory. Nothing else from the
+  clinical table goes there without a new decision.
 - Heavy computation never runs in the foreground: use jobs/run.sh.
 - Follow the three-layer rule and the integration rule stated above.
 
