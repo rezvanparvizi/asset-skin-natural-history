@@ -44,6 +44,10 @@ PAL_TIME <- c(M00 = "#D9D9D9", M03 = "#9ECAE1", M06 = "#2B7BBA")
 
 PAL_IMPROVER <- c(improver = "#2A9D8F", non_improver = "#E76F51")
 
+# mRSS_category from the clinical master table (owner's primary grouping)
+PAL_MRSS_CATEGORY <- c(Improver = "#2A9D8F", Stable = "#E9C46A",
+                       Worsened = "#E76F51", Set_aside = "#9E9E9E")
+
 # Intrinsic subsets — matching the convention in the Whitfield-lab
 # figures so panels read the same way across papers.
 PAL_SUBSET <- c(inflammatory      = "#6A3D9A",
