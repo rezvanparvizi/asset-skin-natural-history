@@ -16,9 +16,10 @@ Last updated: **2026-10-01** · Updated by: Rezvan Parvizi (with Claude Code)
 ## Current focus
 
 **Project 1** — molecular basis of spontaneous mRSS improvement in the ASSET
-placebo arm. Stage 00 and cell QC (03_1) are done for freeze01 (218
-libraries). Next: SoupX (stage 04), then first-pass integration and the
-Placebo UMAP by mRSS_category.
+placebo arm. freeze01 (218 libraries): stage 00, cell QC (03_1), SoupX
+(04_1, accepted) and the upstream comparison (06_0) are done. The
+first-pass integration (05_1, R0022) was running overnight. freeze02 is
+ON HOLD (owner decision) pending the conversation with wasikowr.
 
 ---
 
@@ -113,7 +114,14 @@ Placebo UMAP by mRSS_category.
 
 ## In flight
 
-Nothing running. Waiting on the owner's go-ahead for the integration plan.
+- **R0022 `05_1_harmony_batch_first_pass`** (started 2026-10-01 21:48 UTC,
+  8 threads, screen session). PCA done (49 PCs, the lab's sd rule found
+  no elbow); Harmony on batch_id then UMAPs. Check
+  `logs/20261001_214856_05_1_*.log` and
+  `results/freeze01/reference/05_sc_integration/harmony_batch_first_pass/INTEGRATION_SUMMARY.txt`.
+  Review the integration checks BEFORE the Placebo panels.
+- Conversation with wasikowr on 2026-10-02 — agenda at the end of
+  `docs/data_issues_freeze01.md`.
 
 ---
 
@@ -135,15 +143,17 @@ Nothing running. Waiting on the owner's go-ahead for the integration plan.
 
 ## Next up, in order
 
-1. **Stage 04: SoupX** — install SoupX; script per the 2026-10-01 rule;
-   review the multi-criteria report with the owner.
-2. **Stage 05: first-pass integration** (Harmony on batch_id only) +
-   timepoint-preservation checks; then the Placebo UMAP by
-   mRSS_category (4 panels; M00 only and all timepoints).
-3. **Per-cell-type QC check** once clusters exist (does the 500-UMI
+1. **Review R0022** with the owner: integration checks, then the Placebo
+   UMAPs by mRSS_category (4 panels; M00 only and all timepoints).
+2. **05_2 clustering**: resolution fixed on marker criteria and recorded
+   in decisions.md BEFORE looking at mRSS_category; per-cluster
+   timepoint composition before/after Harmony.
+3. **Broad labels**: wasikowr's 16 labels (barcode table requested) +
+   our marker checks (06_0 tables).
+4. **Per-cell-type QC check** once clusters exist (does the 500-UMI
    floor or MT cut deplete a lineage?).
-4. **Colleague meeting** on `docs/data_issues_freeze01.md`.
-5. Bulk skin: needs the column -> Subject_ID/timepoint map (no sample
+5. **Colleague meeting** on `docs/data_issues_freeze01.md`.
+6. Bulk skin (later): needs the column -> Subject_ID/timepoint map (no sample
    sheet in data/bulk/skin) and which gene-symbol matrix is canonical.
 6. freeze02: 23 newer libraries ALREADY exist (wasikowr, processed Aug
    2026; see data_issues_freeze01.md). 21 are repeats of low-yield
@@ -244,5 +254,12 @@ Detail belongs in `docs/decisions.md` (judgment) and `docs/runs.csv` (runs).
 2026-10-01  Nomenclature fix; design table (00_3) with 2 ID corrections;
             escape censoring dropped; cell QC 03_1 (98.2% pass, 3 failed
             libraries excluded). Reviewed jarnagin/wasikowr pipeline;
-            adopted lab doublet routine; SoupX rule logged.
+            adopted lab doublet routine; SoupX rule logged. SoupX run and
+            accepted (rho median 0.054). Lab cell-typing routine and gene
+            lists copied; stages renumbered (08 immune, 09 lymphoid,
+            10 myeloid, 11 vascular, 12-18). Upstream match: 98.3% of
+            wasikowr's cells pass our QC; her broad labels check out.
+            Found 23 newer libraries in her object (freeze02, on hold).
+            Run-id race fixed in provenance.R. Unpushed history scrubbed
+            of Subject_IDs/specimen codes before push.
 ```
