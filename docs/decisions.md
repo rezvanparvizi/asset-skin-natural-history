@@ -436,3 +436,11 @@ dominated by keratins then COL1A1. One flag (8911-JF-14, 174 cells,
 KRT14 retention 0.51 in a tiny cluster) accepted. Corrected counts
 (data/bpcells/freeze01/counts_soupx/) are used from stage 05 on; raw
 counts stay in counts_raw/.
+
+## 2026-10-01 — freeze02 on hold; continue on freeze01
+
+Owner decision. wasikowr is finishing a new build of the object and will
+discuss on 2026-10-02. Until her sample sheet, the identity of repeats
+#32/#68 and the chemistry question are settled, no freeze02 work starts
+(no copying, no freeze02.yml). All analysis continues on freeze01
+(218 libraries). Findings so far: docs/data_issues_freeze01.md.

@@ -210,3 +210,31 @@ how many samples are still waiting to be sequenced.
   was superseded by 15242-JF_v1); probe barcodes of a different series
   (BC0xx / A-, B-, D- plate wells) than freeze01 — chemistry version to
   confirm with the core. 15231-JF_v1 is a combined pool with 15230-JF.
+
+## Agenda for the conversation with wasikowr (2026-10-02)
+
+Her reply (2026-10-01): she is finishing the latest build; was puzzled
+that the cell type metadata is missing; objects need library(BPCells).
+
+1. **Cell types.** The 2 Sep seurat.RDS metadata has only orig.ident,
+   nCount_RNA, nFeature_RNA, batch, orig.nb, RNA_snn_res.0.1,
+   seurat_clusters. The 16 `celltype` labels exist in the earlier version
+   (jarnagin's objects built from it, June-Aug). Ask: will the new build
+   carry celltype for all cells, and can she export a per-cell table
+   (barcode, orig.ident, celltype) plus the marker genes / cluster ->
+   celltype step?
+2. **Samples.** Confirm 242 = 219 + 23 newer (asset_batch5.csv). Patient
+   and timepoint for #32 and #68; are they repeats of
+   13454-JF-7 and 13484-JF-11? Are 15195-JF-11..16 repeats of the same
+   biopsies as their sample numbers say? Will the new build add more?
+3. **Missing from the sample map.** Why were 13454-JF-7, 13484-JF-11,
+   13596-JF-4, 13634-JF-13, 13639-JF-4, 13639-JF-10 (and 8 other sample
+   numbers) left out — failed, or withdrawn?
+4. **Processing of the newer runs.** force_cells for every library — why;
+   the probe-barcode series differs from freeze01 (chemistry version?).
+5. **Her QC / SoupX.** Filter used (we see > 200 genes); SoupX rho per
+   sample; Harmony variable; why ~2,800 high-UMI cells present in the raw
+   outputs are absent from her object.
+6. **How many samples are still waiting to be sequenced.**
+7. **13639-JF-11 / -12** (one patient, both labelled Month 3): which is
+   Baseline?
