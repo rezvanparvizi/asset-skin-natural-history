@@ -1,4 +1,6 @@
-# Ambient genes excluded from variable-gene selection (never from the data).
+# Ambient genes excluded from variable-gene selection in IMMUNE-compartment
+# embeddings only (never from the data; never for whole-tissue, fibroblast,
+# keratinocyte or vascular embeddings, where these genes define cell types).
 # Copied verbatim on 2026-10-01 from
 #   /home/jarnagin/ASSET_Flex/A_expr_scRNA_ASSET/4_Tcell_Common.R (lines 252-258)
 # so the lab's routine is reproduced exactly. See docs/decisions.md 2026-10-01.

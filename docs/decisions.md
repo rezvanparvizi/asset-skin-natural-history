@@ -317,8 +317,13 @@ Owner decision: doublet/contamination handling follows the routine in
 /home/jarnagin/ASSET_Flex (skin-specific experience of the lab), made
 reproducible here:
 
-1. Ambient genes never drive clustering. Before PCA, variable genes
-   matching her ambient set are removed — regex
+1. Ambient genes do not drive IMMUNE-compartment clustering. In immune
+   (T/NK, myeloid, B/plasma) subcluster embeddings only — as in her
+   4_Tcell_Common.R — variable genes matching her ambient set are
+   removed before PCA. NOT applied to whole-tissue, fibroblast,
+   keratinocyte or vascular embeddings: collagens, DCN, LUM, ACTA2 and
+   keratins define those cell types (her whole-tissue and fibroblast
+   scripts do not exclude them either). Set — regex
    `^(KRT[0-9AP]|COL[0-9]|MT-|RP[LS][0-9]|MTRNR|HB[ABDGQZ][0-9]?$)` plus
    her explicit list (KRTDAP, SBSN, ..., IGKC, IGHG1, IGHM; copied
    verbatim from 4_Tcell_Common.R into metadata/gene_sets/). Genes stay
@@ -345,7 +350,8 @@ routine; may be added later as a sensitivity check only.
 Per library, from sample_raw_feature_bc_matrix.h5 (that library's own
 empty droplets):
 - clusters for SoupX: fixed in advance, identical for every library
-  (log-normalise, 2,000 HVG minus the ambient set above, 30 PCs,
+  (log-normalise, 2,000 HVG — ambient set NOT excluded, since keratin
+  and collagen are what separate the clusters SoupX relies on — 30 PCs,
   Louvain resolution 0.8);
 - rho from autoEstCont; accepted if 0.01 <= rho <= 0.30, otherwise the
   median rho of the same pool (one capture = one ambient environment);
