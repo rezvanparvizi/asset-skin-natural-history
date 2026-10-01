@@ -35,6 +35,8 @@ if (!requireNamespace("yaml", quietly = TRUE)) {
     error = function(e) NA_character_))
   if (length(out) == 0) return(FALSE)
   if (length(out) == 1 && is.na(out[1])) return(NA)
+  # The run registry is written by every run; it does not describe code.
+  out <- out[!grepl("docs/runs\\.csv$", out)]
   length(out) > 0
 }
 
