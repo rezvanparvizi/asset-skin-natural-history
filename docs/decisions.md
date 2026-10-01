@@ -375,3 +375,23 @@ re-tuned. Never judged with mRSS_category in view.
 
 Rejected: per-sample rho tuned by eye (0.1-0.25, upstream object) —
 not reproducible and can track timepoint.
+
+## 2026-10-01 — Integration (stage 05): Harmony on batch_id only, with timepoint-preservation checks
+
+Owner requirement: the integration must keep M00 / M03 / M06 differences.
+Approved plan:
+- Harmony on batch_id (Flex pool) only — pool is independent of
+  timepoint (00_2: p = 1.0), so there is no timepoint signal for Harmony
+  to remove. Never subject, sample, run date or timepoint.
+- Integration changes only the embedding and clusters; composition and
+  DE across timepoints are computed from counts + labels with a patient
+  random effect, so measured timepoint change cannot be removed by it.
+- Checks reported with every integration run: unintegrated vs
+  integrated UMAP side by side; timepoint composition per cluster before
+  vs after (a timepoint-dominated cluster must not dissolve); mixing
+  scores (LISI) for pool (should rise) and timepoint (must not be forced).
+
+Rejected: Harmony on subject (the colleague's usual choice) — it aligns
+patients to each other and so removes between-patient differences such
+as Improver vs Worsened; on sample — additionally removes within-patient
+timepoint change.
