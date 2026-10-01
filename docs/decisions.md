@@ -425,3 +425,14 @@ lab's 2a step); lymphoid (T/NK, B/plasma; stage 09) and myeloid
 result. Vascular moves to 11; later stages shift by one
 (12_sc_assemble_labels ... 18_figures). This supersedes the folder list
 in the previous entry.
+
+## 2026-10-01 — SoupX result (R0020) accepted by the owner
+
+rho median 0.054 (0.010-0.138), all 218 auto-estimates within bounds;
+5.4% of counts removed per library (median). Checks: rho tracks pool
+(expected) but not timepoint (p = 0.10) or arm (p = 0.49); keratin and
+collagen leakage roughly halved; own-marker retention 0.96-1.00; soup
+dominated by keratins then COL1A1. One flag (8911-JF-14, 174 cells,
+KRT14 retention 0.51 in a tiny cluster) accepted. Corrected counts
+(data/bpcells/freeze01/counts_soupx/) are used from stage 05 on; raw
+counts stay in counts_raw/.
