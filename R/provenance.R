@@ -80,6 +80,41 @@ REGISTRY_COLS <- c("run_id", "date", "freeze", "cohort", "labelset",
                    "stage", "run_name", "script", "git_sha", "git_dirty",
                    "status", "verdict")
 
+# Runs can start concurrently (several screen jobs), so a run_id is
+# RESERVED at init_run() by appending a "running" row under a lock, and
+# finalize_run() updates that row. Before 2026-10-01 the row was written
+# only at the end, so two runs started together got the same run_id.
+.with_registry_lock <- function(registry, expr, timeout = 120) {
+  lock <- paste0(registry, ".lock")
+  t0 <- Sys.time()
+  while (!dir.create(lock, showWarnings = FALSE)) {
+    if (difftime(Sys.time(), t0, units = "secs") > timeout) {
+      stop("Could not lock ", registry, " (stale lock? remove ", lock, ")", call. = FALSE)
+    }
+    Sys.sleep(0.2)
+  }
+  on.exit(unlink(lock, recursive = TRUE), add = TRUE)
+  force(expr)
+}
+
+.registry_row <- function(run_id, context, stage, run_name, code, status, verdict) {
+  data.frame(
+    run_id    = run_id,
+    date      = format(Sys.Date(), "%Y-%m-%d"),
+    freeze    = context$freeze,
+    cohort    = context$scope,
+    labelset  = context$labelset,
+    stage     = stage,
+    run_name  = run_name,
+    script    = code$script,
+    git_sha   = substr(ifelse(is.na(code$git_sha), "NA", code$git_sha), 1, 7),
+    git_dirty = as.character(code$git_dirty),
+    status    = status,
+    verdict   = verdict,
+    stringsAsFactors = FALSE
+  )[, REGISTRY_COLS]
+}
+
 .ensure_registry <- function(registry) {
   if (!file.exists(registry)) {
     dir.create(dirname(registry), recursive = TRUE, showWarnings = FALSE)
@@ -154,13 +189,22 @@ init_run <- function(stage,
 
   for (p in c(dir, subs)) dir.create(p, recursive = TRUE, showWarnings = FALSE)
 
-  registry <- file.path(DOCS, "runs.csv")
-  .ensure_registry(registry)
-  run_id <- .next_run_id(registry)
-
   script <- .rel_to_repo(.calling_script())
   sha    <- .git_sha()
   dirty  <- .git_dirty()
+
+  registry <- file.path(DOCS, "runs.csv")
+  .ensure_registry(registry)
+  run_id <- .with_registry_lock(registry, {
+    id <- .next_run_id(registry)
+    utils::write.table(
+      .registry_row(id, list(freeze = freeze, scope = scope, labelset = labelset),
+                    stage, run_name, list(script = script, git_sha = sha, git_dirty = dirty),
+                    "running", ""),
+      registry, sep = ",", append = TRUE, col.names = FALSE, row.names = FALSE,
+      qmethod = "double")
+    id
+  })
 
   cfg <- list(
     run_id      = run_id,
@@ -253,25 +297,22 @@ finalize_run <- function(run,
   registry <- file.path(DOCS, "runs.csv")
   .ensure_registry(registry)
 
-  row <- data.frame(
-    run_id    = run$run_id,
-    date      = format(Sys.Date(), "%Y-%m-%d"),
-    freeze    = run$context$freeze,
-    cohort    = run$context$scope,
-    labelset  = run$context$labelset,
-    stage     = run$stage,
-    run_name  = run$run_name,
-    script    = run$code$script,
-    git_sha   = substr(ifelse(is.na(run$code$git_sha), "NA",
-                              run$code$git_sha), 1, 7),
-    git_dirty = as.character(run$code$git_dirty),
-    status    = status,
-    verdict   = verdict,
-    stringsAsFactors = FALSE
-  )[, REGISTRY_COLS]
+  row <- .registry_row(run$run_id, run$context, run$stage, run$run_name,
+                       run$code, status, verdict)
 
-  utils::write.table(row, registry, sep = ",", append = TRUE,
-                     col.names = FALSE, row.names = FALSE, qmethod = "double")
+  .with_registry_lock(registry, {
+    reg <- utils::read.csv(registry, stringsAsFactors = FALSE, colClasses = "character")
+    i <- which(reg$run_id == run$run_id & reg$status == "running" &
+               reg$run_name == run$run_name)
+    if (length(i) == 1) {
+      reg[i, ] <- row
+      utils::write.table(reg, registry, sep = ",", row.names = FALSE,
+                         col.names = TRUE, qmethod = "double")
+    } else {
+      utils::write.table(row, registry, sep = ",", append = TRUE,
+                         col.names = FALSE, row.names = FALSE, qmethod = "double")
+    }
+  })
 
   # also stamp the run directory so it is self-contained
   cfg <- yaml::read_yaml(file.path(run$dir, "run_config.yml"))
