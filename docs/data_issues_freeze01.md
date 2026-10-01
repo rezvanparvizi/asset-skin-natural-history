@@ -148,3 +148,11 @@ clinical master table; the owner confirmed both as typos. Corrected in
 this repository via metadata/design/subject_id_corrections.csv. The
 colleague's objects (and anything built from the sample map) still carry
 the wrong IDs — worth fixing at the source.
+
+## Lab code issues found while reviewing the cell-typing routine (2026-10-01)
+
+Details in docs/lab_routine_celltyping.md, section 4: the recycling
+subset bug in jarnagin's 1a_Baseline.R (baseline object holds about half
+the cells), the SFPR4 typo, wasikowr's clustering on the UMAP, and
+Harmony on `subject`. Also ask wasikowr for her top-level marker list
+and SoupX settings.

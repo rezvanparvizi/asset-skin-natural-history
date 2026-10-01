@@ -142,7 +142,7 @@ analysis/              numbered stages, run in order:
   01_bulk_skin             bulk skin RNA-seq (GSE217067): subsets, CD28, trajectory
   02_bulk_pbmc             bulk baseline PBMC RNA-seq
   03_sc_qc  04_sc_ambient  05_sc_integration  06_sc_lineage
-  07..10_sc_subcluster_*   fibroblast / myeloid / tnk / adipo_vascular
+  07..10_sc_subcluster_*   fibroblast / immune (all) / lymphoid (T-NK, B-plasma) / vascular
   11_sc_assemble_labels    -> the frozen barcode->label table (Layer 1 output)
   12_sc_composition  13_sc_pseudobulk_de
   14_deconvolution         sc reference -> bulk skin (needs 11)

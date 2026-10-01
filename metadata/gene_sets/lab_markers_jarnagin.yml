@@ -1,0 +1,118 @@
+# Marker and contamination gene lists used by the lab's cell-typing routine
+# (jarnagin, /home/jarnagin/ASSET_Flex/A_expr_scRNA_ASSET), copied verbatim
+# on 2026-10-01. Source file and line context are given per block.
+# How they are used is summarised in docs/lab_routine_celltyping.md.
+#
+# Copied as-is, including one typo in the source: "SFPR4" in
+# fibroblast_subtypes$COL8A1_Fibs is almost certainly SFRP4 (SFPR4 is not
+# a gene, so it was silently dropped in her runs). The intended gene is
+# given under `corrections` and is what our scripts use.
+
+# ---- Top level (lineage) ------------------------------------------------
+# 4_Tcell_Common.R: lineage_panels — plotted to see which lineage a
+# cluster belongs to (z-scored per cluster).
+lineage_panels:
+  T cell:       [CD3D, CD3E, CD3G, CD2, TRAC, IL7R]
+  NK cell:      [NCAM1, KLRD1, KLRF1, NKG7, GNLY, FCGR3A]
+  B / Plasma:   [MS4A1, CD79A, BANK1, MZB1, JCHAIN]
+  Myeloid:      [LYZ, CD68, CD163, CSF1R, ITGAX, AIF1]
+  DC / LC:      [CD1C, CD1A, CLEC9A, FCER1A, CD207]
+  Mast:         [TPSAB1, CPA3, KIT, MS4A2]
+  Keratinocyte: [KRT1, KRT5, KRT10, KRT14, KRTDAP, SBSN]
+  Fibroblast:   [COL1A1, COL1A2, DCN, LUM, PDGFRA]
+  Endothelial:  [PECAM1, VWF, CDH5]
+  Melanocyte:   [PMEL, MLANA, DCT]
+
+# 4_Tcell_Common.R: evidence_panels — scored as the FRACTION OF CELLS in a
+# cluster detecting the program (not z-scored), which is what her drop
+# decisions rest on: an ambient program is high everywhere and a z-score
+# would pin it to one cluster.
+evidence_panels:
+  panT:          [CD3D, CD3E, CD3G, TRAC]
+  CD8:           [CD8A, CD8B]
+  CD4:           [CD4, CD40LG]
+  NK_specific:   [KLRF1, NCAM1, FCGR3A]
+  cytotoxic:     [NKG7, GNLY, GZMB, PRF1]
+  Myeloid:       [LYZ, CD68, CSF1R, AIF1]
+  DC_LC:         [CD1C, CD1A, CD207, FCER1A]
+  Keratinocyte:  [KRT14, KRT5, KRTDAP]
+  Fibroblast:    [COL1A1, DCN, LUM]
+  Endothelial:   [PECAM1, VWF]
+  Melanocyte:    [PMEL, MLANA]
+  Mast:          [TPSB2, CPA3, KIT]
+  B_Plasma:      [MS4A1, CD79A, MZB1]
+  Proliferating: [MKI67, TOP2A]
+
+# ---- Immune compartment -------------------------------------------------
+# FullDataset_Analysis/2a_ImmuneCell_Subclustering.R: marker_lists
+immune_subtypes:
+  Dendritic:    [TPM2, IL3RA, CD300A, IRF7, ITGAX]
+  pDC:          [LILRA4, CLEC4C, BST2]
+  Langerhans:   [CD1A, LAMP3]
+  Macrophage:   [FCER1G, CD163, MSR1, CD209]
+  cDC1:         [DNASE1L3, WDFY4, C1orf54, CPVL, IRF8]
+  cDC2A:        [CCL17, CCL22, FSCN1, MARCKSL1]
+  cDC2B:        [CLEC10A, CD1C, FCER1A, LYZ, CST3]
+  B Cell:       [BANK1, IGHG3, CD72, CD19, PAX5, MS4A1]
+  Plasma Cells: [CD27, CD38, MZB1, PRDM1]
+  T Cells:      [CD3D, CD3G, CD4, CD8A, FOXP3, IL2RA]
+  NK Cells:     [NCAM1, KLRB1, NKG7, GNLY]
+
+# 2a: contamination loop for the immune compartment (round 1; round 2
+# keeps only `fibro`).
+immune_contamination:
+  fibro: [COL1A1, FN1]
+  kerat: [KRT1, KRT2, KRT10, KRT14, KRT15, KRT17]
+
+# ---- Fibroblast compartment ---------------------------------------------
+# FullDataset_Analysis/3a_Fibroblast_Subclustering.R: marker_lists
+fibroblast_subtypes:
+  SFRP2_Fibs:  [SFRP2, WIF1, COL1A1, DCN, COMP]
+  CCL19_Fibs:  [CCL19, APOE, C3, CXCL12, C7]
+  CLDN1_Fibs:  [TAGLN, CLDN1, NGFR]
+  COL8A1_Fibs: [COL8A1, SFPR4, ACTA2, SERPINE1]
+  FMO1_Fibs:   [APOD, PLA2G2A]
+  FMO2_Fibs:   [FGFBP2, FMO2, ALX4, COL26A1]
+  TNN_Fibs:    [COCH, TNN, COL11A1, TNMD, CRABP1]
+
+# 3a: contamination loop for the fibroblast compartment
+fibroblast_contamination:
+  nerve: [NRXN1, CDH19]
+  kerat: [KRT1, KRT2, KRT10, KRT14, KRT15, KRT17]
+
+# ---- B / plasma (second level, within immune) ----------------------------
+# FullDataset_Analysis/6a_BcellPlasma_Subclustering.R: marker_lists
+bplasma_subtypes:
+  B cell:       [MS4A1, CD79A, CD79B, CD19, BANK1, PAX5]
+  Naive/memory: [TCL1A, IGHD, IGHM, CD27, CR2, FCER2]
+  Plasmablast:  [MKI67, TOP2A, IRF4, AICDA, CD38, TNFRSF17]
+  Plasma cell:  [MZB1, JCHAIN, XBP1, PRDM1, DERL3, SDC1]
+  Isotype:      [IGHG1, IGHG3, IGHA1, IGHE, IGLC1, IGKC]
+
+# 6b: on/off-lineage panels for the two-criteria pocket screen
+pocket_screen_panels:
+  Bcell:        [MS4A1, CD79A, CD79B, CD19, BANK1, PAX5]
+  Plasma:       [MZB1, JCHAIN, XBP1, PRDM1, DERL3, SDC1]
+  Myeloid:      [CD163, CSF1R, MRC1, LYZ, MS4A6A, STAB1, F13A1]
+  T_NK:         [CD3D, CD3E, TRBC1, TRAC, IL7R, CD2, ZAP70, NKG7]
+  Fibroblast:   [COL1A1, COL1A2, COL3A1, DCN, LUM, COL6A3]
+  Keratinocyte: [KRT14, KRT10, KRT1, KRT5]
+  Endothelial:  [PECAM1, VWF, CLDN5]     # 6a CONTAM_PANELS only
+
+# ---- Thresholds ---------------------------------------------------------
+thresholds:
+  contamination_loop:            # 2a / 3a flag_clusters()
+    min_expr_lognorm: 0.5        # a cell is marker+ if any marker > 0.5 (log-normalised)
+    frac_cells_flag: 0.30        # cluster dropped if > 30% of its cells are marker+
+    max_iterations: 5            # drop, re-embed, re-cluster, repeat
+    resolution: 0.2
+  pocket_screen:                 # 6a / 6b
+    off_abs: 0.40                # foreign panel score notable above this
+    off_border: 0.15             # worth a human look above this
+    on_min: 0.30                 # dropped only if own identity is below this
+    doublet_umi_ratio: 1.5       # median UMI vs kept cells; above = doublet-like
+  pc_selection:                  # reembed(): first PC whose sd is > 0.995 x the previous
+    sd_ratio: 0.995
+
+corrections:
+  COL8A1_Fibs: [COL8A1, SFRP4, ACTA2, SERPINE1]

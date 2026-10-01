@@ -395,3 +395,24 @@ Rejected: Harmony on subject (the colleague's usual choice) — it aligns
 patients to each other and so removes between-patient differences such
 as Improver vs Worsened; on sample — additionally removes within-patient
 timepoint change.
+
+## 2026-10-01 — Cell-typing follows the lab routine; compartment stages renamed
+
+Owner decision: adopt the lab's cell-typing routine and gene lists
+(docs/lab_routine_celltyping.md; metadata/gene_sets/lab_markers_jarnagin.yml).
+Top level uses wasikowr's 16-label vocabulary; compartments follow
+jarnagin: fibroblast, immune (all immune incl. mast), lymphoid second
+level (T/NK, B/plasma), plus vascular. Stage folders renamed accordingly:
+08_sc_subcluster_myeloid -> 08_sc_subcluster_immune,
+09_sc_subcluster_tnk -> 09_sc_subcluster_lymphoid,
+10_sc_subcluster_adipo_vascular -> 10_sc_subcluster_vascular.
+Adipocytes (~0.5% of cells; PLIN1/FABP4/ADIPOQ+) keep a top-level label
+but get no compartment.
+
+Deviations from the lab code, each for a stated reason: Harmony on
+batch_id not subject; neighbours from PCs not the UMAP; contaminated
+clusters flagged rather than deleted; SFPR4 read as SFRP4.
+
+Rejected: a separate myeloid compartment — the lab annotates all immune
+cells together and then goes deeper on T/NK and B/plasma; splitting
+myeloid out would break comparability with her labels.

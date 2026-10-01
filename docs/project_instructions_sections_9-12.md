@@ -177,8 +177,8 @@ ANALYSIS STAGE ORDER — metadata, then bulk, then single cell
   01_bulk_skin             bulk skin (GSE217067): subset calls, CD28, trajectory
   02_bulk_pbmc             bulk baseline PBMC
   03_sc_qc  04_sc_ambient  05_sc_integration  06_sc_lineage
-  07_sc_subcluster_fibroblast  08_sc_subcluster_myeloid
-  09_sc_subcluster_tnk         10_sc_subcluster_adipo_vascular
+  07_sc_subcluster_fibroblast  08_sc_subcluster_immune
+  09_sc_subcluster_lymphoid    10_sc_subcluster_vascular
   11_sc_assemble_labels    -> the frozen label table (Layer 1 output)
   12_sc_composition        13_sc_pseudobulk_de
   14_deconvolution         sc reference -> bulk skin; needs stage 11, which is
