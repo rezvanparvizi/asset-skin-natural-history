@@ -190,7 +190,7 @@ ANALYSIS STAGE ORDER — metadata, then bulk, then single cell
   builds on, and they exist now; the single-cell object arrives later.
 
 TWO HARD RULES
-  Integrate on batch_id ONLY — never sample_id, subject_id or timepoint.
+  Integrate on batch_id ONLY — never sample_id, Subject_ID or timepoint.
   Within-patient change across timepoints IS the signal of Project 1.
   Do not tune clustering against the outcome, then test that cluster for
   outcome association. Pick resolution on marker criteria, record it in

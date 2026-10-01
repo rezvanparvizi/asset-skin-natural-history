@@ -11,5 +11,5 @@ include: {}          # no filtering
 exclude_post_escape: false
 notes: >
   Never subset here. Integration must correct on batch_id only — not on
-  sample_id, subject_id or timepoint, because within-patient change
+  sample_id, Subject_ID or timepoint, because within-patient change
   across timepoints is the signal of Project 1.

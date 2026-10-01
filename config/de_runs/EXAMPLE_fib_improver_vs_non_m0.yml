@@ -37,7 +37,7 @@ aggregation:
 # limma_voom  — use with duplicateCorrelation() when the SAME subject
 #               contributes multiple timepoints.
 # dream       — variancePartition::dream, proper mixed model with
-#               (1|subject_id). Preferred for any longitudinal contrast.
+#               (1|Subject_ID). Preferred for any longitudinal contrast.
 #
 # The colleague's pipeline uses DESeq2 throughout, which is appropriate
 # for her mostly cross-sectional contrasts. Longitudinal contrasts in
@@ -50,7 +50,7 @@ model:
     variable: improver_12m
     numerator: improver          # >= 5-point OR > 20% mRSS reduction at M12
     denominator: non_improver
-  random_effect: null            # e.g. "(1|subject_id)" when engine = dream
+  random_effect: null            # e.g. "(1|Subject_ID)" when engine = dream
   covariate_notes: >
     RNAP3 and tendon friction rubs predict placebo mRSS trajectory
     (Domsic 2023). Disease duration separates genuine matrix resolution

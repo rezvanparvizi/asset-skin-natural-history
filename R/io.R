@@ -35,7 +35,7 @@ read_manifest <- function(path = file.path(METADATA, "library_manifest.csv")) {
          "The real manifest is gitignored on purpose.", call. = FALSE)
   }
   m <- utils::read.csv(path, stringsAsFactors = FALSE)
-  req <- c("library_id", "sample_id", "subject_id", "group", "arm",
+  req <- c("library_id", "sample_id", "Subject_ID", "group", "arm",
            "timepoint", "batch_id", "qc_status")
   miss <- setdiff(req, names(m))
   if (length(miss)) {
@@ -107,11 +107,23 @@ cohort_samples <- function(cohort   = COHORT,
     if (is.null(clinical)) {
       stop("Cohort '", cohort, "' censors post-escape-therapy samples, so it ",
            "needs the clinical table. Pass clinical = <data.frame with ",
-           "subject_id, escape_start_month>.", call. = FALSE)
+           "Subject_ID, Escape_month>.", call. = FALSE)
+    }
+    # Escape_month (clinical master table): month escape therapy started,
+    # empty if the subject never escaped. Must be numeric; fail rather
+    # than silently censor nothing.
+    if (!all(c("Subject_ID", "Escape_month") %in% names(clinical))) {
+      stop("clinical table lacks Subject_ID or Escape_month.", call. = FALSE)
+    }
+    esc_raw <- clinical$Escape_month
+    esc_num <- suppressWarnings(as.numeric(as.character(esc_raw)))
+    bad <- !is.na(esc_raw) & nzchar(trimws(as.character(esc_raw))) & is.na(esc_num)
+    if (any(bad)) {
+      stop("Escape_month has non-numeric values (", sum(bad), " rows); ",
+           "recode them before cohort censoring.", call. = FALSE)
     }
     tp_month <- as.integer(sub("^M", "", lib$timepoint))
-    esc <- clinical$escape_start_month[match(lib$subject_id,
-                                             clinical$subject_id)]
+    esc <- esc_num[match(lib$Subject_ID, clinical$Subject_ID)]
     drop <- !is.na(esc) & tp_month >= esc
     if (any(drop)) {
       message(sprintf("Cohort '%s': censoring %d post-escape libraries.",

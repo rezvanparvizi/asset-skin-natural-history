@@ -5,7 +5,7 @@ description: >
   "base_control" scope, so results are directly comparable to hers.
 layer: 2
 include:
-  group: [SSC, HC]
+  group: [SSc, HC]
   timepoint: [M00]
 exclude_post_escape: false
 notes: >

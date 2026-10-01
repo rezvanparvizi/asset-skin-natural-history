@@ -27,11 +27,11 @@ message(sprintf("\nManifest: %d libraries", nrow(man)))
 
 issues <- character(0)
 
-# one sample_id should map to one subject_id
-bad_map <- names(which(vapply(split(man$subject_id, man$sample_id),
+# one sample_id should map to one Subject_ID
+bad_map <- names(which(vapply(split(man$Subject_ID, man$sample_id),
                               function(x) length(unique(x)), integer(1)) > 1))
 if (length(bad_map)) {
-  issues <- c(issues, paste("sample_id mapping to >1 subject_id:",
+  issues <- c(issues, paste("sample_id mapping to >1 Subject_ID:",
                             paste(bad_map, collapse = ", ")))
 }
 
@@ -101,7 +101,7 @@ sizes <- do.call(rbind, lapply(coh_files, function(f) {
   n <- tryCatch(nrow(cohort_samples(cid, FREEZE, man, clinical = NULL)),
                 error = function(e) NA_integer_)
   ns <- tryCatch(length(unique(cohort_samples(cid, FREEZE, man,
-                                              clinical = NULL)$subject_id)),
+                                              clinical = NULL)$Subject_ID)),
                  error = function(e) NA_integer_)
   ch <- yaml::read_yaml(f)
   data.frame(cohort = cid, layer = ch$layer %||% NA,
@@ -119,7 +119,7 @@ utils::write.csv(as.data.frame(design),
                  file.path(run$tables, "design_summary.csv"),
                  row.names = FALSE)
 
-save_patient_table(lib, run, "freeze_libraries")   # has subject_id
+save_patient_table(lib, run, "freeze_libraries")   # has Subject_ID
 
 status  <- if (length(issues)) "invalid" else "ok"
 verdict <- if (length(issues)) {
@@ -127,7 +127,7 @@ verdict <- if (length(issues)) {
          paste(substr(issues, 1, 60), collapse = " | "))
 } else {
   sprintf("Manifest clean; freeze %s = %d libraries, %d subjects (%d HC)",
-          FREEZE, nrow(lib), length(unique(lib$subject_id)), nrow(hc))
+          FREEZE, nrow(lib), length(unique(lib$Subject_ID)), nrow(hc))
 }
 
 finalize_run(run, status = status, verdict = verdict)

@@ -55,8 +55,8 @@ n_subjects_hc: 12
 n_cells_estimate: 1300000
 
 timepoints: [M00, M03, M06]
-arms: [PLACEBO, ABATACEPT]
-groups: [SSC, HC]
+arms: [Placebo, Abatacept]
+groups: [SSc, HC]
 
 # ---- exclusions ----------------------------------------------
 # One entry per excluded library, with a reason. If a library is

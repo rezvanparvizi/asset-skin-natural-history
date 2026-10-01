@@ -5,8 +5,8 @@ description: >
   start censored. This is the treatment-naive natural-history cohort.
 layer: 2
 include:
-  group: [SSC]
-  arm: [PLACEBO]
+  group: [SSc]
+  arm: [Placebo]
   timepoint: [M00, M03, M06]
 exclude_post_escape: true
 notes: >

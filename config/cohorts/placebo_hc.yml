@@ -5,8 +5,8 @@ description: >
   the HC cell-state distribution, or somewhere else entirely?
 layer: 2
 include:
-  group: [SSC, HC]
-  arm: [PLACEBO, NA]      # HC rows carry arm = NA
+  group: [SSc, HC]
+  arm: [Placebo, NA]      # HC rows carry arm = NA
   timepoint: [M00, M03, M06]
 exclude_post_escape: true
 notes: >

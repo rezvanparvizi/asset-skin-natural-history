@@ -138,7 +138,7 @@ n_cells <- vapply(cells_by_unit, length, integer(1))
 # per-unit metadata, taken from the first cell of each unit and checked
 # for internal consistency
 meta_cols <- intersect(
-  c("sample_id", "subject_id", "library_id", "group", "arm", "timepoint",
+  c("sample_id", "Subject_ID", "library_id", "group", "arm", "timepoint",
     "batch_id", "run_id"),
   colnames(obj[[]]))
 
@@ -178,8 +178,8 @@ col_data <- col_data[!drop_u, , drop = FALSE]
 
 # join clinical variables needed by the design
 if (!is.null(clin)) {
-  j <- match(col_data$subject_id, clin$subject_id)
-  for (v in setdiff(names(clin), "subject_id")) col_data[[v]] <- clin[[v]][j]
+  j <- match(col_data$Subject_ID, clin$Subject_ID)
+  for (v in setdiff(names(clin), "Subject_ID")) col_data[[v]] <- clin[[v]][j]
 }
 
 # gene filter
@@ -196,9 +196,9 @@ pb <- pb[keep_g, , drop = FALSE]
 # before you fit anything.
 
 donor_check <- do.call(rbind, lapply(
-  split(col_data, col_data$subject_id), function(d) {
+  split(col_data, col_data$Subject_ID), function(d) {
     data.frame(
-      subject_id = d$subject_id[1],
+      Subject_ID = d$Subject_ID[1],
       group      = d$group[1],
       arm        = if ("arm" %in% names(d)) d$arm[1] else NA,
       n_units    = nrow(d),
@@ -274,15 +274,15 @@ if (engine == "deseq2") {
   saveRDS(vsd, file.path(run$objects, "vsd.rds"))
 
 } else if (engine == "limma_voom") {
-  # Repeated measures via duplicateCorrelation on subject_id.
+  # Repeated measures via duplicateCorrelation on Subject_ID.
   stopifnot(requireNamespace("limma", quietly = TRUE),
             requireNamespace("edgeR", quietly = TRUE))
   d <- edgeR::DGEList(pb); d <- edgeR::calcNormFactors(d)
   v <- limma::voom(d, mm, plot = FALSE)
-  dc <- limma::duplicateCorrelation(v, mm, block = col_data$subject_id)
+  dc <- limma::duplicateCorrelation(v, mm, block = col_data$Subject_ID)
   message("  consensus within-subject correlation: ",
           round(dc$consensus.correlation, 3))
-  fit <- limma::lmFit(v, mm, block = col_data$subject_id,
+  fit <- limma::lmFit(v, mm, block = col_data$Subject_ID,
                       correlation = dc$consensus.correlation)
   fit <- limma::eBayes(fit)
   coef_name <- tail(colnames(mm), 1)   # TODO(review): name the coefficient explicitly

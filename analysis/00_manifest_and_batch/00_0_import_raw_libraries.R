@@ -239,12 +239,20 @@ name_date <- ifelse(grepl("^[0-9]{6}_", map$condition),
 
 pinfo <- pool_info[match(map$run_id, pool_info$run_id), ]
 
+# Arm and group values are spelled as they appear in publication figures:
+# Placebo / Abatacept, SSc / HC. Never all caps. Anything else maps to NA
+# and fails the assertion below.
+arm_label <- function(x) {
+  lab <- c(placebo = "Placebo", abatacept = "Abatacept")
+  unname(lab[tolower(trimws(x))])
+}
+
 man <- data.frame(
   library_id        = map$sampleID,
   sample_id         = map$sampleID,     # one library per biopsy in freeze01
-  subject_id        = ifelse(is_hc, map$sampleID, map$patient),
-  group             = ifelse(is_hc, "HC", "SSC"),
-  arm               = ifelse(is_hc, NA, toupper(map$treatment)),
+  Subject_ID        = ifelse(is_hc, map$sampleID, map$patient),
+  group             = ifelse(is_hc, "HC", "SSc"),
+  arm               = ifelse(is_hc, NA, arm_label(map$treatment)),
   timepoint         = unname(tp[map$time]),
   batch_id          = map$run_id,       # Flex pool = one GEM capture
   capture_date      = NA,               # unknown; see sample_name_date
@@ -276,17 +284,17 @@ fail <- function(msg) {
 
 # assertions
 stopifnot(!anyDuplicated(man$library_id),
-          all(man$arm[!is_hc] %in% c("PLACEBO", "ABATACEPT")))
+          all(man$arm[!is_hc] %in% c("Placebo", "Abatacept")))
 # a subject may appear twice at one timepoint only if every library
 # involved is flagged in the freeze
-visit <- paste(man$subject_id, man$timepoint)[!is_hc]
+visit <- paste(man$Subject_ID, man$timepoint)[!is_hc]
 dup <- visit %in% visit[duplicated(visit)]
 unflagged_dup <- dup & is.na(man$design_flag[!is_hc])
 if (any(unflagged_dup)) {
   fail(paste("subject x timepoint not unique and not flagged for libraries:",
              paste(man$library_id[!is_hc][unflagged_dup], collapse = ", ")))
 }
-arm_per_subject <- tapply(man$arm[!is_hc], man$subject_id[!is_hc],
+arm_per_subject <- tapply(man$arm[!is_hc], man$Subject_ID[!is_hc],
                           function(a) length(unique(a)))
 if (any(arm_per_subject > 1)) fail("subject assigned to >1 arm")
 
@@ -322,19 +330,19 @@ qc_note <- with(metrics, trimws(paste(
   ifelse(pct_mapped_in_cells < 40, sprintf("%g%% reads mapped in cells;", pct_mapped_in_cells), ""))))
 qc_note[!nzchar(qc_note)] <- NA
 
-sheet <- merge(man[, c("library_id", "subject_id", "group", "arm", "timepoint",
+sheet <- merge(man[, c("library_id", "Subject_ID", "group", "arm", "timepoint",
                        "design_flag", "batch_id", "sample_name_date",
                        "cellranger_run", "source_orig_ident")],
                cbind(metrics, qc_note_preliminary = qc_note),
                by = "library_id", all.x = TRUE, sort = FALSE)
 sheet$force_cells <- pool_info$force_cells[match(sheet$batch_id, pool_info$run_id)]
-sheet <- sheet[order(sheet$group, sheet$subject_id, sheet$timepoint), ]
+sheet <- sheet[order(sheet$group, sheet$Subject_ID, sheet$timepoint), ]
 stopifnot(nrow(sheet) == nrow(man))
 save_patient_table(sheet, run, "sample_sheet_per_library")
 
-ssc_sheet <- sheet[sheet$group == "SSC", ]
-subj <- do.call(rbind, lapply(split(ssc_sheet, ssc_sheet$subject_id), function(d)
-  data.frame(subject_id = d$subject_id[1], arm = d$arm[1],
+ssc_sheet <- sheet[sheet$group == "SSc", ]
+subj <- do.call(rbind, lapply(split(ssc_sheet, ssc_sheet$Subject_ID), function(d)
+  data.frame(Subject_ID = d$Subject_ID[1], arm = d$arm[1],
              n_libraries = nrow(d),
              has_M00 = "M00" %in% d$timepoint, has_M03 = "M03" %in% d$timepoint,
              has_M06 = "M06" %in% d$timepoint,
@@ -352,7 +360,7 @@ n_unmapped <- sum(nzchar(pool_info$not_in_sample_map) &
 versions <- unique(c(pool_info$cellranger, pool_info$probe_set))
 summary_lines <- c(
   sprintf("Libraries: %d (%d SSc from %d subjects, %d HC)", nrow(man),
-          sum(!is_hc), length(unique(man$subject_id[!is_hc])), sum(is_hc)),
+          sum(!is_hc), length(unique(man$Subject_ID[!is_hc])), sum(is_hc)),
   sprintf("Pools: %d", nrow(pools)),
   sprintf("Pools with libraries absent from the sample map: %d", n_unmapped),
   paste("CellRanger / probe set:", paste(versions, collapse = " | ")))
@@ -361,6 +369,6 @@ cat(paste(summary_lines, collapse = "\n"), "\n")
 
 finalize_run(run, status = "ok", verdict = paste(
   sprintf("%d libraries (%d SSc / %d subjects, %d HC) in %d pools copied and md5-verified;",
-          nrow(man), sum(!is_hc), length(unique(man$subject_id[!is_hc])),
+          nrow(man), sum(!is_hc), length(unique(man$Subject_ID[!is_hc])),
           sum(is_hc), nrow(pools)),
   "manifest generated; batch_id = pool run_id"))

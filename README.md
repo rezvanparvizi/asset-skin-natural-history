@@ -64,7 +64,7 @@ not matched and their proportions are not comparable.
 
 **Rules for Layer 1**
 - Integrate/correct on **technical batch** (`batch_id`), never on `sample_id`,
-  `subject_id`, or `timepoint`. Within-patient change across timepoints is the
+  `Subject_ID`, or `timepoint`. Within-patient change across timepoints is the
   signal; patient effects are handled downstream by a random effect, not by
   erasing them from the embedding.
 - Choose clustering resolution on marker-driven criteria **before** looking at

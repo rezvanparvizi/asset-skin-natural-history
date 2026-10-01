@@ -179,3 +179,39 @@ The screen wrapper used `bash -lc`, contradicting AGENTS.md: a login
 shell sources .bashrc and can re-activate conda (ENVIRONMENT.md
 workaround 1). Changed to `bash -c`; screen inherits PATH from the
 launching shell.
+
+## 2026-10-01 — Publication nomenclature; Subject_ID as the participant key
+
+Values: arm `Placebo` / `Abatacept`, group `SSc` / `HC`, never all caps.
+Participant column: `Subject_ID` everywhere, matching the clinical
+master table. Applied to the manifest generator (00_0 used toupper()
+on the treatment column, which produced PLACEBO / ABATACEPT), cohort
+and freeze configs, palettes in R/theme_asset.R, io.R, the pseudobulk
+pipeline and the data dictionary. The same convention applies to bulk
+skin and bulk PBMC.
+
+Why: labels flow unchanged into plot legends and figure panels; one
+spelling at the source avoids per-figure relabelling and mismatched
+factor levels across modalities.
+
+Rejected: keeping internal codes (SSC, subject_id) and relabelling at
+plot time — every figure script would need a lookup, and joins with
+the clinical table would need a rename step.
+
+Escape-therapy censoring now reads `Escape_month` from the clinical
+master table (was the placeholder `escape_start_month`).
+
+## 2026-10-01 — mRSS source columns: `0`, `1`, `3`, `6`, `9`, `12`
+
+The clinical master table has two near-identical mRSS series: columns
+named `0`…`12` and `MRSSTOTALCALCULATION_0`…`_12`. The owner's decision:
+use `0`…`12`. The calculation columns are not used; their derivation is
+unknown.
+
+Rejected: `MRSSTOTALCALCULATION_*` — undocumented provenance. A later
+check of how often the two series disagree, and by how much, would be
+worth doing once; if they differ for some subjects, that is a question
+for the DCC.
+
+`mRSS_category` levels: Improver / Worsened / Stable / Set_aside.
+Definitions still to be recorded in data_dictionary.md.

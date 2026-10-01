@@ -12,9 +12,9 @@ clinical values.
 |---|---|---|
 | `library_id` | chr | unique per sequencing library. **Primary key.** |
 | `sample_id` | chr | unique per biopsy. A resequenced biopsy has ONE `sample_id` and TWO `library_id`s. |
-| `subject_id` | chr | unique per participant. Multiple samples per subject (M00/M03/M06). |
-| `group` | chr | `SSC` or `HC` |
-| `arm` | chr | `PLACEBO`, `ABATACEPT`, or `NA` for healthy controls |
+| `Subject_ID` | chr | unique per participant. Multiple samples per subject (M00/M03/M06). |
+| `group` | chr | `SSc` or `HC` |
+| `arm` | chr | `Placebo`, `Abatacept`, or `NA` for healthy controls |
 | `timepoint` | chr | `M00`, `M03`, `M06`, or `NA` for HC |
 | `batch_id` | chr | library prep / capture batch. **Load-bearing: hazard #1.** |
 | `capture_date` | date | |
@@ -53,26 +53,66 @@ Valid values for the three label columns are enumerated in
 `metadata/celltype_dictionary.csv`. Do not introduce a label that is
 not in the dictionary — add it there first.
 
-## data/clinical/asset_clinical.csv  [NEVER in git]
+## Nomenclature — used everywhere (tables, configs, plots, figures)
 
-From the U-M Data Coordinating Center. Joined on `subject_id`.
+Values are spelled the way they appear in the publication. Never all caps.
 
-| Column | Meaning |
+| Concept | Column | Values |
+|---|---|---|
+| participant | `Subject_ID` | as in the clinical master table. Same name in every table. |
+| disease group | `group` | `SSc`, `HC` |
+| treatment arm | `arm` | `Placebo`, `Abatacept` (`NA` for HC) |
+| timepoint | `timepoint` | `M00`, `M03`, `M06` |
+
+The same nomenclature applies to bulk skin and bulk PBMC tables.
+
+## ASSET cohort sizes
+
+| | Subjects |
 |---|---|
-| `subject_id` | |
-| `arm` | |
-| `disease_duration_yr` | at baseline; separates matrix resolution from late atrophy |
-| `mrss_m00` ... `mrss_m12` | global mRSS at 0/1/3/6/9/12 months |
-| `mrss_forearm_m00` ... | **site-level forearm score if available.** The biopsy is forearm; local score tracks local biology better than global mRSS. Ask the DCC. |
-| `improver_12m` | `improver` / `non_improver`: >=5-point OR >20% mRSS reduction at M12 (definition used in Khanna 2020, Mehta 2022) |
-| `delta_mrss_12m` | continuous; better powered than the binary version |
-| `escape_start_month` | month escape therapy began; `NA` if never. Drives cohort censoring. |
-| `rnap3` | anti-RNA polymerase III status. Reported inconsistently across the ASSET papers (40%/51% by arm; 39/85; 32/64) — **verify against the DCC before using as a covariate.** |
-| `scl70`, `aca` | other autoantibodies |
-| `tfr` | tendon friction rubs at baseline |
-| `intrinsic_subset` | inflammatory / fibroproliferative / normal-like, from bulk skin (GSE217067) |
-| `cd28_score_m00` | CD28 costimulation module score from bulk skin |
-| `hhaq_di`, `criss`, `fvc_pct`, `dlco_pct`, `ptga`, `phga` | secondary outcomes |
+| Randomised | **88** (44 Placebo, 44 Abatacept) |
+| Bulk skin RNA-seq | **84** subjects (no skin sequencing for 4 of 88) |
+| Bulk PBMC RNA-seq, baseline | **69** subjects from **70** sequenced samples (one sample is a technical duplicate) |
+| scRNA-seq skin (freeze01) | 79 SSc subjects + 12 HC (see `config/freezes/freeze01.yml`) |
+
+Any stage that sees a different count stops and says so.
+
+## Clinical master table  [NEVER in git]
+
+`data/clinical/ASSET_clinical_data_master_subject_based.xlsx`
+(i.e. `/home/parvizi/asset-data/data/clinical/`), one row per subject, all
+88 randomised patients. Joined on `Subject_ID`. Column names only below;
+values are never written into the repository.
+
+**`mRSS_category` is the owner's primary outcome grouping.** Levels:
+`Improver`, `Worsened`, `Stable`, `Set_aside`. The cut-offs defining
+each level, and what puts a subject in `Set_aside`, are to be recorded
+here before any analysis uses it.
+
+| Columns | Meaning |
+|---|---|
+| `Number`, `Subject_ID` | row number; participant ID (join key) |
+| `Treatment_arm` | `Placebo` / `Abatacept` |
+| `Site_ID`, `Site_name`, `PI_name` | enrolling site |
+| `True_improver`, `Improver` | improver calls. **The difference between the two is to confirm.** |
+| `MRSS_Visit1`, `0`, `1`, `3`, `6`, `9`, `12`, `MRSS_MonthNA` | mRSS by visit month. **`0`, `1`, `3`, `6`, `9`, `12` are THE mRSS columns used in this project** (decisions.md, 2026-10-01). The bare numeric names become `X0`…`X12` under R's default `check.names`; read with `readxl` / `check.names = FALSE` and rename explicitly. |
+| `MRSSTOTALCALCULATION_0` … `_12` | similar to the mRSS columns; meaning unknown. **Not used.** |
+| `FVCPTP_screening`, `FVCPTP_Month3` … `_Month12`, `FVCPTP_MonthNA` | FVC % predicted |
+| `Sex`, `Age` | |
+| `Autoantibody_group`, `Autoantibody`, `Scl70`, `RNApol1`, `RNApol3`, `CENPB`, `Antibody_category`, `Antibody_category_lab` | serology. RNAP3 predicts placebo mRSS trajectory (paper 5). |
+| `Note_on_Escape`, `Ever_escaped`, `Escape_month`, `Escape_3mo` … `Escape_12mo` | escape therapy. **`Escape_month` drives cohort censoring** (`cohort_samples()` in `R/io.R`); must be numeric months, empty if never escaped. |
+| `Days_Screening`, `Days_Month0` … `Days_Month12`, `Days_MonthNA` | visit day |
+| `PGA_Physician_Month0` … `_Month12`, `_MonthNA` | physician global assessment |
+| `PtGA_Patient_Month0` … `_Month12`, `_MonthNA` | patient global assessment |
+| `HAQ_DI_Month0` … `_Month12`, `_MonthNA` | HAQ-DI |
+| `DLCO_corrected_Screening`, `_Month6`, `_Month12` | DLCO, corrected |
+| `mRSS_change_6mo`, `mRSS_pctchange_6mo`, `mRSS_change_12mo` | mRSS change from baseline |
+| `mRSS_category`, `mRSS_category_note` | **primary outcome grouping**: `Improver` / `Worsened` / `Stable` / `Set_aside` — see above |
+
+Not in this table, and still needed: disease duration (separates matrix
+resolution from late atrophy), tendon friction rubs, intrinsic subset and
+CD28 score (from bulk skin, GSE217067), forearm site-level skin score if
+the DCC has it.
 
 ### Outcome definition is an open decision
 

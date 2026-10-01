@@ -56,7 +56,7 @@ man <- read_manifest()
 lib <- freeze_libraries(FREEZE, man)
 
 message(sprintf("\nFreeze %s: %d libraries, %d subjects",
-                FREEZE, nrow(lib), length(unique(lib$subject_id))))
+                FREEZE, nrow(lib), length(unique(lib$Subject_ID))))
 
 if (!"batch_id" %in% names(lib) || all(is.na(lib$batch_id))) {
   finalize_run(run, status = "failed",
@@ -112,7 +112,7 @@ batch_vars <- batch_vars[vapply(batch_vars, function(b)
 # Timepoint and arm are compared among SSc libraries only: healthy
 # controls have neither, and letting NA act as a fourth timepoint would
 # fold the HC-vs-SSc question into the timepoint test.
-ssc <- lib[lib$group == "SSC", ]
+ssc <- lib[lib$group == "SSc", ]
 design <- list(timepoint = ssc, arm = ssc, group = lib)
 
 tests <- do.call(rbind, lapply(batch_vars, function(b) {
@@ -139,9 +139,9 @@ print(tests, row.names = FALSE)
 
 nesting <- do.call(rbind, lapply(batch_vars, function(b) {
   per_subject <- do.call(rbind, lapply(
-    split(ssc, ssc$subject_id), function(d) {
+    split(ssc, ssc$Subject_ID), function(d) {
       data.frame(batch_var    = b,
-                 subject_id   = d$subject_id[1],
+                 Subject_ID   = d$Subject_ID[1],
                  arm          = d$arm[1],
                  n_libraries  = nrow(d),
                  n_batches    = length(unique(d[[b]])),
@@ -151,7 +151,7 @@ nesting <- do.call(rbind, lapply(batch_vars, function(b) {
     }))
   per_subject
 }))
-save_patient_table(nesting, run, "batch_nesting_per_subject")   # has subject_id
+save_patient_table(nesting, run, "batch_nesting_per_subject")   # has Subject_ID
 
 multi <- nesting[nesting$n_libraries > 1, ]
 nest_summary <- do.call(rbind, lapply(split(multi, multi$batch_var), function(d)
@@ -206,7 +206,7 @@ flagged <- tests[!is.na(tests$p_value) &
 
 verdict_lines <- c(
   sprintf("Freeze: %s | %d libraries | %d subjects",
-          FREEZE, nrow(lib), length(unique(lib$subject_id))),
+          FREEZE, nrow(lib), length(unique(lib$Subject_ID))),
   "Batch nesting within subject (SSc, subjects with >1 library):",
   utils::capture.output(print(nest_summary, row.names = FALSE)),
   "",

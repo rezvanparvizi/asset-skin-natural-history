@@ -6,8 +6,8 @@ description: >
   natural-history predictors.
 layer: 2
 include:
-  group: [SSC]
-  arm: [PLACEBO, ABATACEPT]
+  group: [SSc]
+  arm: [Placebo, Abatacept]
   timepoint: [M00, M03, M06]
 exclude_post_escape: true
 notes: >

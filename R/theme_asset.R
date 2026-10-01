@@ -36,9 +36,9 @@ theme_asset <- function(base_size = 7, base_family = "") {
 # ---- palettes ------------------------------------------------
 # Fixed colours so the same category is the same colour in every figure.
 
-PAL_ARM <- c(PLACEBO = "#3B6EA5", ABATACEPT = "#C0504D", HC = "#7F7F7F")
+PAL_ARM <- c(Placebo = "#3B6EA5", Abatacept = "#C0504D", HC = "#7F7F7F")
 
-PAL_GROUP <- c(SSC = "#C0504D", HC = "#7F7F7F")
+PAL_GROUP <- c(SSc = "#C0504D", HC = "#7F7F7F")
 
 PAL_TIME <- c(M00 = "#D9D9D9", M03 = "#9ECAE1", M06 = "#2B7BBA")
 
