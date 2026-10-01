@@ -140,3 +140,11 @@ Questions:
   they processed with the same protocol and CellRanger version?
 - Can their sample map come in the same format, with the pool and the
   sample-name date?
+
+## Subject ID typos in the sample map (found 2026-10-01)
+
+Two `patient` values in the scRNA-seq sample map do not match the
+clinical master table; the owner confirmed both as typos. Corrected in
+this repository via metadata/design/subject_id_corrections.csv. The
+colleague's objects (and anything built from the sample map) still carry
+the wrong IDs — worth fixing at the source.

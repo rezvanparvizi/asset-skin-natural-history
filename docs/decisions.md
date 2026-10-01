@@ -237,3 +237,19 @@ these fields to the AI service.
 mRSS_category calls may be revised by the owner/PI later. Every stage
 reads them from the design table at run time, so a revision means
 re-running 00_3 and the downstream plots, not editing scripts.
+
+## 2026-10-01 — Subject ID corrections for the scRNA-seq sample map
+
+Two subject IDs in the scRNA-seq sample map are typos, confirmed by the
+owner against the clinical master table (found by 00_3, R0007). The
+corrections live in metadata/design/subject_id_corrections.csv
+(gitignored: sample-map ID, correct Subject_ID, who confirmed, date) and
+are applied by 00_0 as the sample map is read, so the manifest and every
+downstream table carry the corrected Subject_ID. Any re-run of 00_0, and
+any later freeze built from the same sample map, inherits the fix.
+
+Rejected: correcting the IDs downstream (in 00_3 or at each join) —
+every consumer of the manifest would have to remember to do it.
+
+To pass on: the colleague's Seurat objects carry the uncorrected IDs in
+their patient metadata. Added to the colleague discussion list.

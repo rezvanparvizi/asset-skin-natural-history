@@ -57,6 +57,24 @@ if (length(miss)) stop("sample map lacks columns: ", paste(miss, collapse = ", "
 if (anyDuplicated(map$sampleID)) stop("duplicate sampleID in sample map")
 message(sprintf("Sample map: %d libraries", nrow(map)))
 
+# Subject ID corrections, confirmed by the owner, applied before anything
+# else uses map$patient (metadata/design/subject_id_corrections.csv,
+# gitignored; docs/decisions.md 2026-10-01). A correction whose
+# sample-map ID is absent is reported, not fatal: a later sample map may
+# already be fixed upstream.
+ID_FIX <- file.path(DESIGN, "subject_id_corrections.csv")
+if (file.exists(ID_FIX)) {
+  fix <- utils::read.csv(ID_FIX, stringsAsFactors = FALSE, colClasses = "character")
+  stopifnot(all(c("sample_map_id", "Subject_ID") %in% names(fix)),
+            !anyDuplicated(fix$sample_map_id))
+  hit <- match(map$patient, fix$sample_map_id)
+  map$patient[!is.na(hit)] <- fix$Subject_ID[hit[!is.na(hit)]]
+  message(sprintf("Subject ID corrections: %d of %d applied (%d libraries)",
+                  length(unique(stats::na.omit(hit))), nrow(fix), sum(!is.na(hit))))
+} else {
+  message("No subject ID corrections file at ", .rel_to_repo(ID_FIX))
+}
+
 # per_sample_outs/<lib>/count/sample_filtered_feature_bc_matrix.h5
 map$sample_dir <- dirname(dirname(map$path))
 map$pool_dir   <- sub("/per_sample_outs/.*$", "", map$path)
