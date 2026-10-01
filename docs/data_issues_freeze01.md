@@ -174,3 +174,39 @@ count/ subfolder): /hits/home/wasikowr/ffpe/{14794,15195,15231,15242}-JF_v1/.
 These are freeze02 material. Asked wasikowr (Slack, 2026-10-01) for a
 sample sheet for all 242 samples, CellRanger paths, per-cell labels and
 how many samples are still waiting to be sequenced.
+
+## Cross-check of sample records: ours vs wasikowr vs jarnagin (2026-10-01)
+
+- Sample map: wasikowr's firstrun/demo.txt and jarnagin's results/demo.txt
+  are identical (same md5); it is our freeze01 source. wasikowr's
+  firstrun/input.txt = our 209 SSc libraries.
+- Samples: ours 221 imported / 218 in freeze01; jarnagin 219 (all
+  timepoints; = ours + 13596-JF-9, minus our 2 zero-cell failed
+  libraries); wasikowr 2 Sep object 242 = those 219 + 23 newer.
+- Subject IDs: jarnagin's `patient` column = our Subject_ID + trailing
+  "B" for all 207 SSc libraries, once our two corrections are applied —
+  her metadata carries the same two typos.
+  Timepoint and arm agree for every library.
+- jarnagin's `subject` column is a per-biopsy SPECIMEN code (site
+  prefix + number), unique per library; the prefix is the site. Specimen numbers
+  are NOT chronological within patient (4 subjects out of order), so they
+  cannot resolve 13639-JF-11/-12 (two different specimens, both "Month 3";
+  the patient's M06 specimen has a higher number than both).
+- Sample-map gaps: 14 sample numbers are absent (32, 68, 77, 118, 125,
+  131, 198, 203, 208, 209, 211, 214, 215, 222). The first six fall
+  between consecutive libraries of one pool, i.e. most likely the pool
+  libraries missing from the sample map: 13454-JF-7, 13484-JF-11,
+  13596-JF-4, 13634-JF-13, 13639-JF-4, 13639-JF-10 (inferred, not
+  confirmed). Their per-sample outputs were not copied into data/raw.
+- Repeats (asset_batch5.csv): `batch` = original sample number.
+  15 of 15 repeats that carry a specimen code match the original
+  library's specimen -> same biopsy, confirmed. 6 repeats (15195-JF-11..16)
+  carry no code -> same biopsy by sample number only. 2 repeats (#32,
+  #68) have no original in the sample map; by the gap
+  analysis they repeat 13454-JF-7 and 13484-JF-11. Patient/timepoint
+  for these two unknown.
+- New runs: every library forced (force_cells), unlike freeze01 SSc
+  pools; probe set v1.1.0 (same as freeze01; a v2-probe run of 15242-JF
+  was superseded by 15242-JF_v1); probe barcodes of a different series
+  (BC0xx / A-, B-, D- plate wells) than freeze01 — chemistry version to
+  confirm with the core. 15231-JF_v1 is a combined pool with 15230-JF.
