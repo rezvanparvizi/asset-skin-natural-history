@@ -329,8 +329,11 @@ replaceable <- !file.exists(mf) ||
 # with ASSET_REPLACE_MANIFEST=1. The old manifest is kept next to the new
 # generated one, never discarded.
 if (!replaceable && identical(Sys.getenv("ASSET_REPLACE_MANIFEST"), "1")) {
-  prev <- file.path(dirname(new_file), "library_manifest_previous.csv")
-  file.copy(mf, prev, overwrite = FALSE)
+  prev <- file.path(dirname(new_file),
+                    paste0("library_manifest_replaced_by_", run$run_id, ".csv"))
+  if (!file.copy(mf, prev, overwrite = FALSE)) {
+    fail(paste("could not keep the previous manifest at", prev))
+  }
   Sys.chmod(prev, "0600")
   message("ASSET_REPLACE_MANIFEST=1: previous manifest kept at ", .rel_to_repo(prev))
   replaceable <- TRUE

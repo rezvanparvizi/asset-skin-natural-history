@@ -126,21 +126,19 @@ sc_avail <- do.call(rbind, lapply(split(ssc_lib, ssc_lib$Subject_ID), function(d
 
 # ID matching report: written before any failure so the mismatch can be
 # inspected.
-id_report <- rbind(
-  data.frame(Subject_ID = setdiff(sc_avail$Subject_ID, clin$Subject_ID),
-             issue = "in scRNA-seq manifest, not in clinical table",
-             stringsAsFactors = FALSE),
-  data.frame(Subject_ID = setdiff(clin$Subject_ID, sc_avail$Subject_ID),
-             issue = "in clinical table, no scRNA-seq library in this freeze",
-             stringsAsFactors = FALSE))
+issue_rows <- function(ids, issue) {
+  data.frame(Subject_ID = as.character(ids), issue = rep(issue, length(ids)),
+             stringsAsFactors = FALSE)
+}
 j <- match(sc_avail$Subject_ID, clin$Subject_ID)
 arm_mismatch <- !is.na(j) & sc_avail$sc_arm_manifest != clin$arm[j]
-if (any(arm_mismatch)) {
-  id_report <- rbind(id_report, data.frame(
-    Subject_ID = sc_avail$Subject_ID[arm_mismatch],
-    issue = "arm differs between scRNA-seq manifest and clinical table",
-    stringsAsFactors = FALSE))
-}
+id_report <- rbind(
+  issue_rows(setdiff(sc_avail$Subject_ID, clin$Subject_ID),
+             "in scRNA-seq manifest, not in clinical table"),
+  issue_rows(setdiff(clin$Subject_ID, sc_avail$Subject_ID),
+             "in clinical table, no scRNA-seq library in this freeze"),
+  issue_rows(sc_avail$Subject_ID[arm_mismatch],
+             "arm differs between scRNA-seq manifest and clinical table"))
 write_design(id_report, "id_match_report")
 
 n_sc_unmatched <- sum(!sc_avail$Subject_ID %in% clin$Subject_ID)
