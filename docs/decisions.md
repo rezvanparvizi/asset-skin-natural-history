@@ -416,3 +416,12 @@ clusters flagged rather than deleted; SFPR4 read as SFRP4.
 Rejected: a separate myeloid compartment — the lab annotates all immune
 cells together and then goes deeper on T/NK and B/plasma; splitting
 myeloid out would break comparability with her labels.
+
+## 2026-10-01 — Immune compartment: all immune first, then lymphoid and myeloid subsets
+
+Owner decision: stage 08 subclusters ALL immune cells (first pass, the
+lab's 2a step); lymphoid (T/NK, B/plasma; stage 09) and myeloid
+(macrophages, DCs, Langerhans, mast; stage 10) are each subset from 08's
+result. Vascular moves to 11; later stages shift by one
+(12_sc_assemble_labels ... 18_figures). This supersedes the folder list
+in the previous entry.

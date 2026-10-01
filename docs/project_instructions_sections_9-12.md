@@ -133,7 +133,7 @@ TWO KNOWN GAPS, both documented, neither blocking
       colleague's existing calls (she has scDblFinder 1.16.0 results on this
       dataset). Affects analysis/04_sc_ambient/.
   MuSiC — its dependency TOAST no longer downloads from Bioc 3.23. Not
-      installed. Affects analysis/14_deconvolution/ only, well downstream.
+      installed. Affects analysis/15_deconvolution/ only, well downstream.
       Options later: Bioc archive, vendor TOAST, Scaden, or CIBERSORTx.
 
 DEFERRED, DOCUMENTED, NOT INSTALLED
@@ -178,13 +178,14 @@ ANALYSIS STAGE ORDER — metadata, then bulk, then single cell
   02_bulk_pbmc             bulk baseline PBMC
   03_sc_qc  04_sc_ambient  05_sc_integration  06_sc_lineage
   07_sc_subcluster_fibroblast  08_sc_subcluster_immune
-  09_sc_subcluster_lymphoid    10_sc_subcluster_vascular
-  11_sc_assemble_labels    -> the frozen label table (Layer 1 output)
-  12_sc_composition        13_sc_pseudobulk_de
-  14_deconvolution         sc reference -> bulk skin; needs stage 11, which is
+  09_sc_subcluster_lymphoid    10_sc_subcluster_myeloid
+  11_sc_subcluster_vascular
+  12_sc_assemble_labels    -> the frozen label table (Layer 1 output)
+  13_sc_composition        14_sc_pseudobulk_de
+  15_deconvolution         sc reference -> bulk skin; needs stage 12, which is
                            why it sits after the single-cell block rather than
                            with the other bulk stages
-  15_multimodal  16_clinical_models  17_figures
+  16_multimodal  17_clinical_models  18_figures
   Bulk comes before single cell because the bulk skin data and its
   intrinsic-subset calls are the established prior knowledge this project
   builds on, and they exist now; the single-cell object arrives later.

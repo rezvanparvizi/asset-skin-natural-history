@@ -142,11 +142,12 @@ analysis/              numbered stages, run in order:
   01_bulk_skin             bulk skin RNA-seq (GSE217067): subsets, CD28, trajectory
   02_bulk_pbmc             bulk baseline PBMC RNA-seq
   03_sc_qc  04_sc_ambient  05_sc_integration  06_sc_lineage
-  07..10_sc_subcluster_*   fibroblast / immune (all) / lymphoid (T-NK, B-plasma) / vascular
-  11_sc_assemble_labels    -> the frozen barcode->label table (Layer 1 output)
-  12_sc_composition  13_sc_pseudobulk_de
-  14_deconvolution         sc reference -> bulk skin (needs 11)
-  15_multimodal  16_clinical_models  17_figures
+  07..11_sc_subcluster_*   fibroblast / immune (all) / lymphoid (T-NK, B-plasma) /
+                           myeloid / vascular
+  12_sc_assemble_labels    -> the frozen barcode->label table (Layer 1 output)
+  13_sc_composition  14_sc_pseudobulk_de
+  15_deconvolution         sc reference -> bulk skin (needs 12)
+  16_multimodal  17_clinical_models  18_figures
 jobs/
   run.sh                 launch a script in a DETACHED screen session
   status.sh              running jobs, load, recent log verdicts
@@ -171,7 +172,7 @@ data/ results/ figures/ logs/    [symlinks to large storage, gitignored]
 ## Conventions
 
 **Script naming:** `{stage}_{seq}_{verb_phrase}.R` →
-`14_3_label_fibroblast_subtypes.R`. Lexical sort equals execution order.
+`07_3_label_fibroblast_subtypes.R`. Lexical sort equals execution order.
 
 **Run naming:** `{compartment}_{contrast}_{scope}` →
 `fib_improver_vs_non_m0`. Describes the *question*, not the date or the

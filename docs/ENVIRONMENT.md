@@ -538,7 +538,7 @@ existing calls. Affects `analysis/04_sc_ambient/`.
 ### `MuSiC` — blocked by `TOAST` disappearing from Bioconductor 3.23
 
 `MuSiC` downloaded fine; its dependency `TOAST` returns "failed to download",
-presumably deprecated in 3.23. Affects `analysis/14_deconvolution/`.
+presumably deprecated in 3.23. Affects `analysis/15_deconvolution/`.
 
 Options when needed: install `TOAST` from the Bioconductor archive, vendor it
 from GitHub, use `Scaden` (Python, already in the plan), or `CIBERSORTx`. The

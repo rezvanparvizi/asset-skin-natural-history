@@ -6,8 +6,8 @@ be regenerated without guesswork.
 
 | Figure | File | Script | Run ID | Cohort | Caption gist |
 |---|---|---|---|---|---|
-| 1a | `fig1a_cohort_schematic.pdf` | `17_1_cohort_schematic.R` | | placebo | trial design, biopsy timepoints, escape-therapy censoring |
-| 1b | `fig1b_umap_all_lineages.pdf` | `17_2_overview_umaps.R` | | reference | all cells, lineage labels |
+| 1a | `fig1a_cohort_schematic.pdf` | `18_1_cohort_schematic.R` | | placebo | trial design, biopsy timepoints, escape-therapy censoring |
+| 1b | `fig1b_umap_all_lineages.pdf` | `18_2_overview_umaps.R` | | reference | all cells, lineage labels |
 | 2a | | | | placebo | composition by improver status, baseline |
 | 2b | | | | placebo | composition trajectory M0 -> M3 -> M6 |
 | 2c | | | | placebo_hc | distance to healthy-control centroid over time |

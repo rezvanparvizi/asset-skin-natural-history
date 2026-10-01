@@ -90,9 +90,11 @@ Neutrophils, Proliferating.
 | Clustering | resolution 0.2 inside compartments | Neighbours from the Harmony PCs, never from the UMAP. Resolution recorded before mRSS_category is looked at. |
 | Counts | — | SoupX re-run with a documented rule; raw counts kept alongside. |
 
-Stage folders: `07_sc_subcluster_fibroblast`, `08_sc_subcluster_immune`,
-`09_sc_subcluster_lymphoid` (T/NK and B/plasma inside immune),
-`10_sc_subcluster_vascular`.
+Stage folders: `07_sc_subcluster_fibroblast`, `08_sc_subcluster_immune`
+(all immune cells, first pass), then two subsets of it:
+`09_sc_subcluster_lymphoid` (T/NK and B/plasma) and
+`10_sc_subcluster_myeloid` (macrophages, DCs, Langerhans, mast);
+`11_sc_subcluster_vascular`.
 
 ## 4. Issues found in the lab code (to pass on)
 

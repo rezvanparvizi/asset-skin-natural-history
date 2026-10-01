@@ -120,7 +120,7 @@ results/{freeze}/{reference|cohort|exploratory}/{stage}/{run_name}/
 Example:
 
 ```
-results/freeze01/placebo/13_sc_pseudobulk_de/fib_improver_vs_non_m0/
+results/freeze01/placebo/14_sc_pseudobulk_de/fib_improver_vs_non_m0/
 ├── run_config.yml        # the RESOLVED config, copied in at runtime
 ├── session_info.txt      # R + package versions
 ├── git_sha.txt           # code version
@@ -159,7 +159,7 @@ pipelines/
   pseudobulk_de.R      config-driven, standardized output contract
   composition_test.R
 analysis/
-  00_manifest_and_batch/ ... 17_figures/    numbered stages, run in order
+  00_manifest_and_batch/ ... 18_figures/    numbered stages, run in order
 jobs/
   run.sh               launch a script in a detached screen session
   status.sh            list running jobs and tail their logs
@@ -181,9 +181,9 @@ data/ results/ figures/ logs/     [symlinks to large storage, gitignored]
 **Scripts:** `{stage}_{seq}_{verb_phrase}.R`
 
 ```
-14_1_subset_fibroblasts.R
-14_2_sweep_resolution.R
-14_3_label_fibroblast_subtypes.R
+07_1_subset_fibroblasts.R
+07_2_sweep_resolution.R
+07_3_label_fibroblast_subtypes.R
 ```
 
 Zero-padded, snake_case, lexical sort equals execution order.
@@ -218,7 +218,7 @@ archival trees nobody can safely clean up.
 
 ```bash
 # on the server, from the repo root
-jobs/run.sh analysis/07_sc_subcluster_fibroblast/14_1_subset_fibroblasts.R \
+jobs/run.sh analysis/07_sc_subcluster_fibroblast/07_1_subset_fibroblasts.R \
   --freeze freeze01 --cohort reference --labelset labelset01
 ```
 
