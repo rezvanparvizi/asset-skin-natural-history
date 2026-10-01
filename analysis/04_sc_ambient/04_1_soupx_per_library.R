@@ -103,19 +103,21 @@ read_h5 <- function(f) {
   m
 }
 
-# The filtered (cells) and raw (droplets) matrices do not always carry the
-# same gene list. Keep the shared genes in the filtered order and report
-# the difference; stop if more than 5% of either list is unmatched.
+# Flex: the raw (droplet) matrix lists every reference gene (~39k), the
+# filtered (cell) matrix only the probe-panel genes (~18k). Every
+# cell-matrix gene must exist in the raw matrix; the raw-only genes are
+# outside the panel and are dropped. Differences are reported.
 align_genes <- function(toc, tod, lib) {
   common <- intersect(rownames(toc), rownames(tod))
-  if (length(common) < 0.95 * max(nrow(toc), nrow(tod))) {
-    stop(lib, ": only ", length(common), " shared genes (filtered ", nrow(toc),
-         ", raw ", nrow(tod), ")")
+  if (length(common) < nrow(toc)) {
+    stop(lib, ": ", nrow(toc) - length(common), " cell-matrix genes absent from ",
+         "the raw matrix (filtered ", nrow(toc), ", raw ", nrow(tod), ")")
   }
   diff <- data.table(library_id = lib, n_genes_filtered = nrow(toc),
                      n_genes_raw = nrow(tod), n_genes_shared = length(common),
                      only_in_filtered = paste(setdiff(rownames(toc), common), collapse = ";"),
-                     only_in_raw = paste(head(setdiff(rownames(tod), common), 50), collapse = ";"))
+                     n_only_in_raw = nrow(tod) - length(common),
+                     raw_only_counts = sum(tod[setdiff(rownames(tod), common), , drop = FALSE]))
   list(toc = toc[common, , drop = FALSE], tod = tod[common, , drop = FALSE], diff = diff)
 }
 
@@ -377,9 +379,10 @@ flagged <- est[nzchar(review_flag)]
 top_soup <- head(soup_top[rank <= 5, .N, by = gene][order(-N)], 10)
 summary_lines <- c(
   sprintf("Libraries: %d   cells: %s", nrow(est), format(nrow(cells), big.mark = ",")),
-  sprintf("Genes shared filtered/raw: %s (libraries with a difference: %d)",
-          paste(unique(range(gene_diff$n_genes_shared)), collapse = "-"),
-          sum(gene_diff$n_genes_shared < pmax(gene_diff$n_genes_filtered, gene_diff$n_genes_raw))),
+  sprintf("Genes: %s probe-panel genes used; raw matrices carry %s extra non-panel genes with %s total counts",
+          paste(unique(gene_diff$n_genes_shared), collapse = "/"),
+          paste(unique(gene_diff$n_only_in_raw), collapse = "/"),
+          format(sum(gene_diff$raw_only_counts), big.mark = ",")),
   sprintf("rho: median %.3f, range %.3f-%.3f; from autoEstCont %d, pool median %d",
           stats::median(est$rho_used), min(est$rho_used), max(est$rho_used),
           sum(est$rho_source == "autoEstCont"), sum(est$rho_source != "autoEstCont")),
