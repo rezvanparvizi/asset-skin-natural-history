@@ -26,7 +26,7 @@
 # file present with a DIFFERENT md5 stops the script — raw data is never
 # silently overwritten.
 #
-#   jobs/run.sh analysis/00_manifest_and_batch/00_0_import_raw_libraries.R \
+#   [ASSET_REPLACE_MANIFEST=1] jobs/run.sh analysis/00_manifest_and_batch/00_0_import_raw_libraries.R \
 #     --freeze freeze01 --cohort reference
 # ==============================================================
 
@@ -307,6 +307,16 @@ new_file <- save_patient_table(man, run, "library_manifest_generated")
 replaceable <- !file.exists(mf) ||
   identical(unname(tools::md5sum(mf)), unname(tools::md5sum(tmpl))) ||
   identical(unname(tools::md5sum(mf)), unname(tools::md5sum(new_file)))
+# A deliberate regeneration (e.g. a nomenclature change) is requested
+# with ASSET_REPLACE_MANIFEST=1. The old manifest is kept next to the new
+# generated one, never discarded.
+if (!replaceable && identical(Sys.getenv("ASSET_REPLACE_MANIFEST"), "1")) {
+  prev <- file.path(dirname(new_file), "library_manifest_previous.csv")
+  file.copy(mf, prev, overwrite = FALSE)
+  Sys.chmod(prev, "0600")
+  message("ASSET_REPLACE_MANIFEST=1: previous manifest kept at ", .rel_to_repo(prev))
+  replaceable <- TRUE
+}
 if (!replaceable) {
   finalize_run(run, status = "failed",
                verdict = "existing manifest differs from the generated one; not overwritten")
