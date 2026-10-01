@@ -9,19 +9,43 @@ organised; this says where we are.
 items to Done, revise In flight, add anything newly blocked. If it goes stale
 it becomes worse than nothing, because it will be believed.
 
-Last updated: **2026-09-29** · Updated by: Rezvan Parvizi (with Claude Code)
+Last updated: **2026-10-01** · Updated by: Rezvan Parvizi (with Claude Code)
 
 ---
 
 ## Current focus
 
 **Project 1** — molecular basis of spontaneous mRSS improvement in the ASSET
-placebo arm. Stage 00 is done for freeze01. Next are the clinical table and
-the meeting with colleagues about the data issues, then stage 03 (QC).
+placebo arm. Stage 00 and cell QC (03_1) are done for freeze01 (218
+libraries). Next: SoupX (stage 04), then first-pass integration and the
+Placebo UMAP by mRSS_category.
 
 ---
 
 ## Done
+
+### 2026-10-01 — nomenclature, design table, cell QC
+
+- Nomenclature everywhere: `Placebo`/`Abatacept`, `SSc`/`HC`, `Subject_ID`
+  (00_0 had used toupper()).
+- Subject design table `metadata/design/subject_design.csv` (00_3, R0016;
+  agent-readable by owner decision): Subject_ID, arm, mRSS_category,
+  escape fields, scRNA-seq timepoints + library IDs. 88 subjects (44/44),
+  79 SSc with scRNA-seq. Placebo mRSS_category: Improver 19, Stable 13,
+  Worsened 8, Set_aside 4 (only 1 Set_aside has scRNA-seq).
+- Two sample-map ID typos corrected via
+  `metadata/design/subject_id_corrections.csv`, applied in 00_0.
+- No escape censoring: no Placebo patient escaped before the M06 biopsy.
+  Escape/medications are out of scope for processing (owner).
+- Cell QC 03_1 (R0017): per-library 3-MAD + floor (>=200 genes, >=500
+  UMI) + MT; 1,191,247 of 1,213,176 cells pass (98.2%). freeze01 now
+  excludes 3 failed libraries (13718-JF-14, 13719-JF-10, 13596-JF-9);
+  4 weak ones kept and listed under `qc_review_libraries`.
+- Decisions logged: QC rule, SoupX rule with skin-specific checks, lab
+  doublet/ambient routine (jarnagin's pocket screen; ambient-gene HVG
+  exclusion in immune embeddings only).
+- Reviewed the colleague's pipeline (see Open questions and
+  data_issues_freeze01.md).
 
 ### Stage 00 — freeze01 (2026-09-29)
 
@@ -89,7 +113,7 @@ the meeting with colleagues about the data issues, then stage 03 (QC).
 
 ## In flight
 
-Nothing. Clean stopping point.
+Nothing running. Waiting on the owner's go-ahead for the integration plan.
 
 ---
 
@@ -101,7 +125,6 @@ Nothing. Clean stopping point.
 | **Site ID per patient** | owner, from the clinical table | Adds site to the batch check (00_2 picks up `site_id` automatically). |
 | **Which of 13639-JF-11/-12 is Baseline** | Jarnagin / DCC | Both are excluded from cohorts until resolved. |
 | **Chemistry / fixation** confirmation | sequencing core | Probe set (v1.1.0), CellRanger (9.0.1; 9.0.0 for 5 controls) and reference are confirmed. Chemistry and fixation are still TODO in freeze01.yml. |
-| **Clinical table** from the U-M DCC | DCC | Needed for cohort censoring (`placebo` drops post-escape samples), and for every model's covariates. |
 | **Colleague's label tables** (barcode → lineage/celltype/subtype) | Jarnagin | Preferred over inheriting her Seurat objects; decouples us from her ongoing iteration. Questions listed in `docs/inherited_objects.md`. |
 | **Which of her objects is current** | Jarnagin | `res0p2` / `res0p3` / `from3b` / `_v2` / `Round1` / `Round2` cannot be resolved from filenames. |
 | **`/hits/home/parvizi` ownership** | wasikowr | Currently owned by her, mode 777. Cannot `chmod` it; working in a `700` subdirectory instead, but the parent stays world-writable so the directory could be deleted wholesale. |
@@ -112,16 +135,16 @@ Nothing. Clean stopping point.
 
 ## Next up, in order
 
-1. **Clinical table.** The owner builds it against the sample sheets and
-   puts it in `data/clinical/`. It must include site ID and the
-   escape-therapy start month. Then re-run 00_2 to add site.
-2. **Colleague meeting** on `docs/data_issues_freeze01.md`. Record the
-   answers in `docs/decisions.md`.
-3. **Stage 03: QC** per library from `data/raw/*/*/sample_filtered_feature_bc_matrix.h5`.
-   The 6 CellRanger outliers are already flagged.
-4. **Stage 04: SoupX** from the sample_raw matrices. Write the rho rule
-   in decisions.md BEFORE running it (see the 2026-09-29 entry).
-5. Decide the doublet route (scDblFinder is blocked).
+1. **Stage 04: SoupX** — install SoupX; script per the 2026-10-01 rule;
+   review the multi-criteria report with the owner.
+2. **Stage 05: first-pass integration** (Harmony on batch_id only) +
+   timepoint-preservation checks; then the Placebo UMAP by
+   mRSS_category (4 panels; M00 only and all timepoints).
+3. **Per-cell-type QC check** once clusters exist (does the 500-UMI
+   floor or MT cut deplete a lineage?).
+4. **Colleague meeting** on `docs/data_issues_freeze01.md`.
+5. Bulk skin: needs the column -> Subject_ID/timepoint map (no sample
+   sheet in data/bulk/skin) and which gene-symbol matrix is canonical.
 6. freeze02 (~20 new samples, about a month away): add them with a new
    `freeze02.yml` and re-run everything. Hold the expensive manual
    subtype annotation (stages 07–10) until then.
@@ -140,11 +163,19 @@ biopsy is forearm; local score tracks local biology better (THBS1 r = 0.76
 local versus weaker against global). And binary improver (≥5 points or >20% at
 12 months, the definition in papers 01/03) versus continuous trajectory —
 binary is comparable to prior work, continuous is better powered with ~19 vs
-~19. **Not yet decided.** Ask the DCC whether site-level scores exist.
+~19. **Owner's grouping: `mRSS_category` (Improver / Stable / Worsened /
+Set_aside) from the clinical master table**; calls may be revised by the
+PI. Formal outcome for inference still to be stated before any test.
 
-**Primary timepoint.** Month 6 is contaminated by escape therapy (16/44
-placebo, starting *because* they were worsening). Baseline-predicts-12-month
-is the cleaner framing. **Not yet decided.**
+**Primary timepoint.** Escape is no longer a concern for tissue (no Placebo
+escape before the M06 biopsy). The owner wants M00 alone and all
+timepoints. **Which is primary for inference: not yet decided.**
+
+**Starting point: wasikowr's object vs raw CellRanger.** Currently raw
+(00_0). The colleague kept wasikowr's cell set but re-read raw integer
+counts herself (1b_RawCountsReading.R). Owner is weighing lab convention;
+a barcode-level comparison of the two cell sets would make the choice
+concrete.
 
 **Inherit or rebuild Layer 1.** Taking the colleague's annotation saves months
 but inherits her filtering history — note the `prefilter_bcell_2026-08-26`
@@ -153,13 +184,9 @@ downstream results. Building fresh gives a clean documented reference layer
 both could share. **Worth agreeing a single versioned canonical label set with
 her before either of us has a figure.**
 
-**How rho is set for SoupX.** The colleague tuned 0.1–0.25 by eye per
-sample. Write a rule first (marker-leakage criteria, the same for every
-library, never judged with improver status in view). **Not yet decided.**
-
-**Doublet detection route.** `scDblFinder` is blocked by the gcc 9 / C++20
-ceiling. Options: `DoubletFinder`, `scds`, or inherit her existing calls (she
-has `scDblFinder 1.16.0` results on this dataset). **Not yet decided.**
+**SoupX rho** — decided 2026-10-01 (decisions.md). **Doublets** — decided
+2026-10-01: lab routine (pocket screen). Note: no scDblFinder results were
+found in the upstream objects, contrary to the 2026-09-29 note.
 
 ---
 
@@ -212,4 +239,8 @@ Detail belongs in `docs/decisions.md` (judgment) and `docs/runs.csv` (runs).
             check (R0003: timepoint clean, HC fully confounded with
             pool). Patient-level outputs moved to data/patient_level/.
             Discussion list for colleagues written.
+2026-10-01  Nomenclature fix; design table (00_3) with 2 ID corrections;
+            escape censoring dropped; cell QC 03_1 (98.2% pass, 3 failed
+            libraries excluded). Reviewed jarnagin/wasikowr pipeline;
+            adopted lab doublet routine; SoupX rule logged.
 ```
