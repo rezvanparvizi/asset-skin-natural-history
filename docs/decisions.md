@@ -310,3 +310,62 @@ everywhere; any result can be re-checked without them.
 
 Rejected: keeping 13596-JF-9's 127 passing cells — too few to represent
 a biopsy, and drawn from a library whose cell calling failed.
+
+## 2026-10-01 — Doublets and ambient genes: follow the lab's routine (jarnagin)
+
+Owner decision: doublet/contamination handling follows the routine in
+/home/jarnagin/ASSET_Flex (skin-specific experience of the lab), made
+reproducible here:
+
+1. Ambient genes never drive clustering. Before PCA, variable genes
+   matching her ambient set are removed — regex
+   `^(KRT[0-9AP]|COL[0-9]|MT-|RP[LS][0-9]|MTRNR|HB[ABDGQZ][0-9]?$)` plus
+   her explicit list (KRTDAP, SBSN, ..., IGKC, IGHG1, IGHM; copied
+   verbatim from 4_Tcell_Common.R into metadata/gene_sets/). Genes stay
+   in the data; they are only excluded from HVG selection.
+2. Doublet/contamination pockets are called per compartment at
+   subclustering, on clusters, with TWO conditions: foreign-lineage
+   panel score > 0.40 AND own-lineage identity < 0.30 (her OFF_ABS /
+   ON_MIN). Foreign signal alone is ambient, not grounds to drop a cell.
+3. Every dropped cluster gets her doublet check: median UMI relative to
+   the kept cells; > 1.5x is doublet-like, otherwise it is dropped as
+   low-confidence identity, NOT as a doublet. Reported every time.
+4. Cells labelled fibroblast/keratinocyte inside the immune compartment
+   after subclustering are removed (her 2b step).
+
+Cells are flagged in the label table, not deleted from the counts.
+No algorithmic doublet caller in the primary route (scDblFinder is
+blocked here and the lab does not use one in this pipeline).
+
+Rejected: scDblFinder / scds as the primary route — not the lab's
+routine; may be added later as a sensitivity check only.
+
+## 2026-10-01 — SoupX rule (stage 04), approved by the owner
+
+Per library, from sample_raw_feature_bc_matrix.h5 (that library's own
+empty droplets):
+- clusters for SoupX: fixed in advance, identical for every library
+  (log-normalise, 2,000 HVG minus the ambient set above, 30 PCs,
+  Louvain resolution 0.8);
+- rho from autoEstCont; accepted if 0.01 <= rho <= 0.30, otherwise the
+  median rho of the same pool (one capture = one ambient environment);
+- output adjustCounts(roundToInt = TRUE): integer corrected counts as a
+  separate layer; raw counts remain the base layer.
+
+Skin needs more than one check (owner): every library is judged on
+several criteria, reported side by side, before the corrected counts
+are used —
+  (a) rho per library vs pool, timepoint and arm (must not track design);
+  (b) marker leakage before/after: keratin (KRT1/5/10/14) in immune and
+      fibroblast cells, collagen (COL1A1/COL1A2/COL3A1) in immune and
+      keratinocyte cells, HBB outside erythroid, IGKC/JCHAIN outside
+      plasma cells;
+  (c) on-lineage markers must NOT drop (COL1A1 in fibroblasts, KRT14 in
+      basal keratinocytes, PTPRC in immune) — evidence of over-correction;
+  (d) the soup profile's top genes per library, which should be
+      keratinocyte/fibroblast-dominated in skin.
+A library failing (b)-(c) is reviewed with the owner, not silently
+re-tuned. Never judged with mRSS_category in view.
+
+Rejected: per-sample rho tuned by eye (0.1-0.25, upstream object) —
+not reproducible and can track timepoint.

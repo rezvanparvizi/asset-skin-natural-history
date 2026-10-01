@@ -1,0 +1,10 @@
+# Ambient genes excluded from variable-gene selection (never from the data).
+# Copied verbatim on 2026-10-01 from
+#   /home/jarnagin/ASSET_Flex/A_expr_scRNA_ASSET/4_Tcell_Common.R (lines 252-258)
+# so the lab's routine is reproduced exactly. See docs/decisions.md 2026-10-01.
+regex: "^(KRT[0-9AP]|COL[0-9]|MT-|RP[LS][0-9]|MTRNR|HB[ABDGQZ][0-9]?$)"
+genes: [KRTDAP, SBSN, CALML5, DSP, LOR, FLG, FLG2, DMKN,
+        LGALS7, LGALS7B, S100A7, S100A8, S100A9, CSTA, CSTB,
+        SFN, PERP, AQP3, JUP, EVPL, PKP1, AHNAK2, DCD,
+        SCGB2A2, SCGB1D2, MUCL1, PIP, MGP, DCN, LUM,
+        ACTA2, TAGLN, PMEL, MLANA, TYRP1, IGKC, IGHG1, IGHM]
