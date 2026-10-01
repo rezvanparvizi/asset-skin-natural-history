@@ -250,6 +250,8 @@ should be read.
    Month-6 placebo samples are partly drug-exposed and systematically depleted
    of non-improvers. Cohort `placebo` censors them; `placebo_all` does not and
    exists for sensitivity analysis.
+   **Resolved for tissue (decisions.md, 2026-10-01):** no Placebo patient
+   escaped before the M06 biopsy, so no tissue sample is censored.
 3. **TISSUE ENDS AT MONTH 6, OUTCOME AT MONTH 12.** Frame as prediction, not
    as observing tissue at maximal improvement.
 4. **FALLING mRSS ≠ REVERSED FIBROSIS.** Dermal atrophy and appendage/adipose

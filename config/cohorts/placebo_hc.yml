@@ -8,7 +8,7 @@ include:
   group: [SSc, HC]
   arm: [Placebo, NA]      # HC rows carry arm = NA
   timepoint: [M00, M03, M06]
-exclude_post_escape: true
+exclude_post_escape: false   # owner, 2026-10-01: no Placebo escape before the M06 biopsy
 notes: >
   Healthy controls have no timepoint structure — treat them as a fixed
   reference point, not as a longitudinal arm. Check whether HC libraries

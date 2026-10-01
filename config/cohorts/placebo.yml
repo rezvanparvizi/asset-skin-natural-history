@@ -8,7 +8,7 @@ include:
   group: [SSc]
   arm: [Placebo]
   timepoint: [M00, M03, M06]
-exclude_post_escape: true
+exclude_post_escape: false   # owner, 2026-10-01: no Placebo escape before the M06 biopsy
 notes: >
   16/44 placebo participants started immunomodulators from month 6,
   specifically because they were worsening. Uncensored month-6 placebo

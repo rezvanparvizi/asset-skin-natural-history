@@ -9,7 +9,7 @@ include:
   group: [SSc]
   arm: [Placebo, Abatacept]
   timepoint: [M00, M03, M06]
-exclude_post_escape: true
+exclude_post_escape: false   # owner, 2026-10-01: escape not tracked at tissue stage
 notes: >
   Out of scope for the primary Project 1 analysis. Keep any arm
   comparison clearly separated from the natural-history claim in both

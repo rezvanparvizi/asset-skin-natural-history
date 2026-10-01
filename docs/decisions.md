@@ -253,3 +253,46 @@ every consumer of the manifest would have to remember to do it.
 
 To pass on: the colleague's Seurat objects carry the uncorrected IDs in
 their patient metadata. Added to the colleague discussion list.
+
+## 2026-10-01 — No escape-therapy censoring of tissue samples
+
+The owner checked the Placebo patients: none started escape therapy
+before the month-6 biopsy, and no immunosuppressive treatment was
+allowed in Placebo at months 0, 3 or 6. So every Placebo M00/M03/M06
+biopsy is treatment-free, and `exclude_post_escape` is false in every
+cohort. `placebo` and `placebo_all` now resolve to the same libraries;
+both are kept so existing run names stay valid.
+
+Medication review over months 0-6 is being done separately by the owner
+with a colleague; escape and treatment are not tracked in this
+repository's processing stages.
+
+Rejected: censoring by Escape_month (the scaffold's default) — it would
+have dropped every M06 biopsy from the 10 Placebo patients whose escape
+month is 6, although those biopsies precede escape therapy. Those
+patients are concentrated in the Worsened group, so the censoring
+itself would have biased the comparison.
+
+## 2026-10-01 — Cell QC rule (stage 03): per-library adaptive + hard floor
+
+Chosen before any cell-level data are examined, applied identically to
+every library, never revisited with mRSS_category in view.
+
+Per library, a cell fails QC if ANY of:
+- log10 UMI   < median − 3 MAD (that library)      [low quality / empty]
+- log10 genes < median − 3 MAD (that library)
+- genes < 200 or UMI < 500                          [hard floor]
+- log10 UMI   > median + 5 MAD (that library)      [crude doublet guard
+  until a doublet method is chosen; lenient so large cells survive]
+- % mitochondrial > median + 3 MAD AND > 10%, ONLY if the Flex probe
+  panel contains MT- genes (the script reports whether it does)
+
+Failing cells are kept in the per-cell table with qc_pass = FALSE and a
+reason, not dropped, so the rule can be revised without recomputing.
+Libraries are flagged for review (not removed) if < 500 cells pass or
+> 50% fail. The owner reviews the QC outputs before integration.
+
+Rejected: (A) one fixed threshold for all libraries — depth differs
+widely between pools (6 CellRanger outliers, forced-cell HC re-runs),
+so a fixed cut makes pool decide which cells survive; (B) MAD alone —
+a uniformly poor library has a poor median and keeps its junk.
