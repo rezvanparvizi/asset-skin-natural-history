@@ -38,7 +38,8 @@ suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
 })
-options(bitmapType = "cairo")
+options(bitmapType = "cairo",
+        future.globals.maxSize = 8 * 1024^3)   # FindNeighbors ships ~1 GB of globals at 1.2M cells (R0038 failed on the 500 MB default)
 
 CL <- list(grid = c(0.05, 0.1, 0.2, 0.3, 0.5, 0.8), k_param = 20, louvain_n_start = 3,
            margin = 1.0, max_ambiguous_frac = 0.05, compare_resolution = 0.1,
