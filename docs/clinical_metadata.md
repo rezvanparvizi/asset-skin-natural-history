@@ -43,13 +43,16 @@ by 00_4 into `metadata/design/clinical_column_inventory.csv`,
   `MRSSTOTALCALCULATION_*`), `FVCPTP_*`, `DLCO_corrected_*`, `HAQ_DI_Month*`,
   `PGA_Physician_Month*`, `PtGA_Patient_Month*`, `Days_*`.
 
-## Codings that differ between files (harmonise before joining)
+## Codings
 
-| Field | master | skin / PBMC sheets |
-|---|---|---|
-| Sex | `Female` / `Male` | `F` / `M` |
-| Improver, True_improver | `Non-Improver` | `Non_Improver` |
-| Ever_escaped | `True` / `False` | `TRUE` / `FALSE` |
+Harmonised in the skin workbook on 2026-10-02 (00_7, R0033) to the
+master's coding: Sex `Female`/`Male` (was `F`/`M`); Improver and
+True_improver `Non-Improver` (was `Non_Improver`). Still different (escape
+left out by the owner): Ever_escaped `True`/`False` (master) vs
+`TRUE`/`FALSE` (skin).
+
+**Blank cells are often the text `NA`** in these workbooks. Any script
+must treat `"NA"` as missing before testing a flag (R0035 crashed on this).
 
 ## How to filter the skin samples (owner's rule)
 
@@ -68,8 +71,9 @@ by 00_4 into `metadata/design/clinical_column_inventory.csv`,
 
 `replicate` (1 / 2; 8 samples = 2) and the `_A` Sample_ID suffix mark the
 same 8 second samples. `ASSETpaper_2022` marks the 140 samples used in the
-2022 paper. Final-use column after the skin QC: **pending** (item 4 of the
-2026-10-02 request).
+2022 paper. **Use `Use_downstream == "Yes"`** (added 2026-10-02 by 01_1, R0036): it
+applies Exclude, Repeat and the QC rule in one column, with the reason in
+`Use_reason`. Same 219 samples as the owner's two filters.
 
 PBMC: `QC_flag` = `ok` 62, `check` 6, `exclude_suggested` 2 (owner's QC).
 One subject has two PBMC samples.
@@ -78,7 +82,21 @@ One subject has two PBMC samples.
 
 - Master subjects with >= 1 skin bulk sample: 84 / 88; with PBMC: 69 / 88.
 - All skin and PBMC Subject_IDs exist in the master.
-- Per-patient availability column in the master: **pending** (item 5).
+- Master column **`Bulk_baseline_data`** (01_2, R0037): usable BASELINE bulk
+  data per patient. Skin = a Baseline sample with `Use_downstream == "Yes"`;
+  PBMC = a PBMC sample whose `QC_flag` is not `exclude_suggested`.
+
+| Bulk_baseline_data | Abatacept | Placebo | Total |
+|---|---|---|---|
+| skin+PBMC | 29 | 34 | 63 |
+| skin only | 14 | 3 | 17 |
+| PBMC only | 0 | 4 | 4 |
+| none | 1 | 3 | 4 |
+
+Placebo by mRSS_category (Improver / Stable / Worsened / Set_aside):
+skin+PBMC 16 / 10 / 6 / 2; skin only 0 / 1 / 2 / 0; PBMC only 1 / 2 / 0 / 1;
+none 2 / 0 / 0 / 1. QC filters change: Baseline skin 84 -> 80 patients
+(owner's Exclude), PBMC 69 -> 67 (exclude_suggested).
 
 ## Inconsistencies found (2026-10-02; 00_5 R0031, 00_6 R0032) — details for the owner
 
@@ -99,3 +117,39 @@ ID-level lists: `data/patient_level/freeze01/reference/00_manifest_and_batch/`
 
 Everything else agrees: arm, age, autoantibodies, escape 3/9/12 mo, all
 timepoint scores, PBMC site.
+
+## Bulk skin QC (01_1, R0036) — added to the skin workbook
+
+Columns added (same definitions and rules as the owner's PBMC QC,
+`analysis/02_bulk_pbmc/1.4_QC_70_samples.R`, gitignored because it holds
+IDs): `raw_library_size`, `corrected_library_size` (blank: no ComBat-seq for
+skin), `genes_detected_TPM1`, `hemoglobin_TPM_pct`, `mito_TPM_pct`,
+`median_cor_to_others`, `cor_before_vs_after_combat` (blank), `PC1`, `PC2`,
+`PCA_distance_PC1to5`, `Note`, `QC_flag`, `Use_downstream`, `Use_reason`.
+Expressed genes: TPM >= 1 in >= 20% of samples (17,151). Library size from
+the Ensembl raw counts; the rest from the symbol TPM matrix.
+
+Result: QC ok 215, check 10, exclude_suggested 9. **All 9 PCA outliers are
+already in the owner's Exclude**; the other 2 owner exclusions are QC
+"check". No owner-kept sample is an outlier; 5 kept samples are "check"
+(kept; reason in Note). Rules triggered: low similarity 9, PCA outlier 9,
+few genes 16, low depth (< 3M) 5, many genes 1. The 2022-paper set explains
+<= 3.4% of any of PC1-5 (no batch split).
+
+## Matrix column fix
+
+One skin matrix column is misspelt (the metadata is right: it matches the
+ID built from Subject_ID + Timepoint). Rename map:
+`data/clinical/bulk_skin_matrix_column_fixes.csv` — every script that
+reads the skin matrices must apply it (01_1 does).
+
+## Edit log of the owner's workbooks (backups in data/clinical/backup/<run_id>/)
+
+| Run | Script | Workbook | Change |
+|---|---|---|---|
+| R0033 | 00_7 | skin | Sex, Improver, True_improver coding; mRSS_category from the master (1 subject, 2 rows: Set_aside -> Worsened) |
+| R0036 | 01_1 | skin | 14 QC / use columns added |
+| R0037 | 01_2 | master | `Bulk_baseline_data` added |
+
+Not changed, pending the owner: autoantibody columns (being confirmed
+externally; many statuses wrong), escape columns.
