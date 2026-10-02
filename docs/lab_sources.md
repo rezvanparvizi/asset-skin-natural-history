@@ -80,6 +80,8 @@ Findings:
   or raw h5 counts (`1b`, TCAT). Her 4a comment documents raw-count ambient
   in T cells (KRT14 in 46% of T cells raw vs 0% corrected).
 - `3a_Fibroblast_Subclustering.R`: `SFPR4` typo (SFRP4 silently dropped).
+- `4_Tcell_Common.R:88,113`: mast panels use TPSAB1 / TPSB2, which are not in
+  the Flex probe panel (score nothing; checked 2026-10-02).
 - Harmony on `subject` (= per-biopsy specimen code) in compartment scripts.
 - Her metadata `patient` = our Subject_ID + "B"; carries the same two
   sample-map typos we corrected.

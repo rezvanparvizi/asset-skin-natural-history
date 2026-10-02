@@ -274,3 +274,13 @@ genes (soup genes lose less than average), so it is not the ambient
 correction. Ask: which CellRanger output / settings built seurat.RDS, and
 is any step after SoupX rescaling counts? Details:
 docs/ambient_soupx_freeze01.md.
+
+## Marker genes not in the Flex probe panel (found 2026-10-02)
+
+TPSAB1 and TPSB2 (tryptase) are not among the panel's 18,123 genes, so
+they score nothing. jarnagin's mast panels use them:
+`4_Tcell_Common.R:88` (TPSAB1, CPA3, KIT, MS4A2) and `:113` (TPSB2, CPA3,
+KIT), plus superseded copies in both 4a/4b. The mast call there rests on
+the remaining genes only (silently, like SFPR4). Our dictionary's CD204 is
+a protein name (gene MSR1). Worth a check of every lab gene list against
+the panel; 05_3 now stops on any missing panel gene.
