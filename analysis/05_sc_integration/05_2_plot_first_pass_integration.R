@@ -60,14 +60,18 @@ obj <- readRDS(obj_file)
 pc_dim <- ncol(Embeddings(obj, "harmony"))
 for (v in c("timepoint", "batch_id", "Subject_ID", "group", "coarse_lineage",
             "wasikowr_celltype", "mRSS_category", "library_id")) {
-  obj@meta.data[[v]] <- as.character(obj@meta.data[[v]])
+  x <- as.character(obj@meta.data[[v]])
+  x[!is.na(x) & !nzchar(x)] <- NA            # the manifest stores missing as "" (e.g. HC timepoint)
+  obj@meta.data[[v]] <- x
 }
 message(sprintf("Loaded %s cells, %d Harmony dims", format(ncol(obj), big.mark = ","), pc_dim))
 
 # unintegrated UMAP subset: from 05_1 if it saved one, otherwise computed here
-un_file <- file.path(results_dir("05_sc_integration", "harmony_batch_first_pass"),
-                     "objects", "umap_unintegrated_subset.csv.gz")
-if (file.exists(un_file)) {
+un_file <- c(file.path(results_dir("05_sc_integration", "harmony_batch_first_pass"),
+                       "objects", "umap_unintegrated_subset.csv.gz"),
+             file.path(run$objects, "umap_unintegrated_subset.csv.gz"))
+un_file <- un_file[file.exists(un_file)][1]
+if (!is.na(un_file)) {
   und <- fread(un_file)
   sub_cells <- und$cell_id; un <- as.matrix(und[, .(un_1, un_2)])
 } else {
