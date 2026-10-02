@@ -152,4 +152,5 @@ core.*
 # availability). Readable by AI agents by the owner's decision
 # (docs/decisions.md, 2026-10-01), but still never committed.
 metadata/design/
-analysis/02_bulk_pbmc/1.4_QC_70_samples.R   # owner QC script; contains sample IDs
+# owner QC script; contains sample IDs
+analysis/02_bulk_pbmc/1.4_QC_70_samples.R
