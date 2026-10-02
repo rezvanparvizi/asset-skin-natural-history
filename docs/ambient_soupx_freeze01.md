@@ -86,3 +86,17 @@ Fixed rho for every library; no marker-based estimation (no reliable
 clusters yet). Value 0.13 — see decisions.md 2026-10-02. Implemented as a
 separate step, `04_2_correct_ambient_fixed_rho.R`, reusing 04_1's
 clusters and soup; output in data/bpcells/freeze01/counts_corrected/.
+
+## Result: 04_2, rho 0.13 (R0026, 2026-10-02)
+
+13.0% of counts removed per library (12.9-13.1%), vs 5.4% with autoEstCont.
+Leakage, median over libraries (raw -> autoEstCont -> rho 0.13):
+keratin in immune 0.52% -> 0.29% -> 0.04%; keratin in fibroblasts
+0.52% -> 0.30% -> 0.07%; collagen in immune 0.20% -> 0.13% -> 0.02%;
+collagen in keratinocytes 0.12% -> 0.06% -> 0.01%; Ig outside immune
+unchanged (0.02%). Own-marker retention, median (min): COL1A1 in
+fibroblasts 0.976 (0.713), KRT14 in keratinocytes 0.898 (0.000), PTPRC in
+immune 1.000 (0.833). KRT14 loses ~10% in keratinocytes, expected: the soup
+is keratinocyte-like, so SoupX removes some genuine keratinocyte signal.
+One library flagged, 8911-JF-14 (174 cells; KRT14 retention 0 in a tiny
+cluster), the same library flagged under autoEstCont.

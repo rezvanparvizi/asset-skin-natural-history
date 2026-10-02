@@ -509,5 +509,5 @@ first and is not revisited with outcome in view.
 Rejected: B, the lab's fixed 0.1 (chosen on a different pipeline, clusters
 built on the UMAP; no guarantee rare types separate); C, stability across
 subsamples alone (outcome-free but not tied to biology; costly at 1.2M).
-Panels: drafted 2026-10-02; genes marked `draft` to be reviewed by the
-owner. Not in the Flex panel and so not usable: TPSAB1, TPSB2, CD204.
+Panels: drafted 2026-10-02; the `draft` panels were approved by the
+owner the same day. Not in the Flex panel and so not usable: TPSAB1, TPSB2, CD204.
