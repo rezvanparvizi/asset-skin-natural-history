@@ -54,6 +54,8 @@ run <- init_run(
 
 # ---- inputs ------------------------------------------------------
 skin <- as.data.table(read_excel(file.path(CLINICAL, P$skin_file), col_types = "text"))
+# blank cells in the owner's workbooks are often the text "NA": treat as missing in any logic
+na_txt <- function(v) { v[!is.na(v) & toupper(trimws(v)) %in% c("NA", "")] <- NA; v }
 fix_file <- file.path(CLINICAL, "bulk_skin_matrix_column_fixes.csv")
 fixes <- if (file.exists(fix_file)) fread(fix_file) else data.table(matrix_column = character(), correct_Sample_ID = character())
 read_mat <- function(f) {
@@ -101,7 +103,8 @@ qc[, QC_flag := fifelse(grepl("PCA outlier", Note), "exclude_suggested",
                 fifelse(!is.na(Note), "check", "ok"))]
 
 # ---- final column ---------------------------------------------------
-qc[, `:=`(Exclude = skin$Exclude, Repeat = skin$Repeat, Subject_ID = skin$Subject_ID, Timepoint = skin$Timepoint)]
+qc[, `:=`(Exclude = na_txt(skin$Exclude), Repeat = na_txt(skin$Repeat), Subject_ID = skin$Subject_ID, Timepoint = skin$Timepoint)]
+stopifnot(qc[, sum(!is.na(Exclude))] == 11, qc[, sum(!is.na(Repeat))] == 8)     # counts from 00_5
 qc[, Use_reason := trimws(paste(fifelse(!is.na(Exclude), "Exclude (owner)", ""),
                                 fifelse(!is.na(Repeat), "Repeat", ""),
                                 fifelse(QC_flag == "exclude_suggested", "QC: PCA outlier", "")))]
@@ -120,8 +123,8 @@ tw <- qc[, .(n = .N, kept_bad = any(is.na(Exclude) & is.na(Repeat) & QC_flag == 
 units <- qc[Use_downstream == "Yes", .N, by = Timepoint]
 lost <- qc[is.na(Exclude) & is.na(Repeat) & QC_flag == "exclude_suggested", .N]
 batch_r2 <- if ("ASSETpaper_2022" %in% names(skin)) {
-  g <- factor(is.na(skin$ASSETpaper_2022))
-  sapply(1:5, function(k) summary(lm(pca$x[, k] ~ g))$r.squared)
+  g <- factor(is.na(na_txt(skin$ASSETpaper_2022)))
+  if (nlevels(g) == 2) sapply(1:5, function(k) summary(lm(pca$x[, k] ~ g))$r.squared) else rep(NA_real_, 5)
 } else rep(NA_real_, 5)
 summ <- data.table(item = c("samples", "expressed genes used", "QC ok", "QC check", "QC exclude_suggested",
                             "owner-kept samples that QC would drop (PCA outlier)",
@@ -144,7 +147,7 @@ p <- ggplot(qc, aes(PC1, PC2, colour = QC_flag, shape = Use_downstream)) + geom_
   labs(subtitle = sprintf("Bulk skin, log2(TPM+1), %d expressed genes", sum(expr))) + theme_asset()
 save_plot(p, run, "pca_qc_flag", width = 6, height = 4.5)
 if (!all(is.na(batch_r2))) {
-  p2 <- ggplot(cbind(qc, set = ifelse(is.na(skin$ASSETpaper_2022), "not in 2022 paper", "2022 paper")),
+  p2 <- ggplot(cbind(qc, set = ifelse(is.na(na_txt(skin$ASSETpaper_2022)), "not in 2022 paper", "2022 paper")),
                aes(PC1, PC2, colour = set)) + geom_point(size = 1.4) + theme_asset()
   save_plot(p2, run, "pca_by_2022_paper_set", width = 6, height = 4.5)
 }
