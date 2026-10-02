@@ -27,6 +27,7 @@ Root: `/hits/home/wasikowr/ffpe/`
 | `Asset/firstrun/input.txt` | Our 209 SSc libraries. | 2026-10-01 |
 | `Asset/firstrun/asset_batch5.csv` | The 23 newer libraries: `sampleID, path, batch` (= original sample number), `condition`. | 2026-10-01 |
 | `Asset/Batch1`..`Batch5`, `Batch*a`, `bpcells_obj*` | Per-batch working folders. `Batch1` holds `ffpe_report.pdf` (95 MB), `harmony.RData` (47 GB), `markers.csv`. Reports **not read** (no PDF tools on the server) — may document her settings. | 2026-10-02 (listing only) |
+| `Asset/Batch{1,1a,2a,3,3a,4,4a,5}/markers.csv` | Seurat `FindAllMarkers` output per batch (`p_val, avg_log2FC, pct.1, pct.2, p_val_adj, cluster, gene`; Batch1 12,757 rows). Cluster NUMBERS only — no cluster -> cell-type map, so it does not give her 16-label marker list. | 2026-10-02 |
 | `{14794,15195,15231,15242}-JF_v1/` | **CellRanger outputs for the 23 newer libraries (freeze02 material)**, re-run by wasikowr Aug 2026. Flat `per_sample_outs` layout (no `count/` subfolder — 00_0 must handle it). All forced cells; probe set v1.1.0; probe barcodes of a different series than freeze01. `15231-JF_v1` is a combined pool with 15230-JF. A v2-probe run of 15242-JF was superseded by `15242-JF_v1`. | 2026-10-01 |
 | other `ffpe/*-JF*` folders | Other projects' runs (controls, keloids, scalp, ...). Not ASSET; not examined. | 2026-10-02 (listing only) |
 

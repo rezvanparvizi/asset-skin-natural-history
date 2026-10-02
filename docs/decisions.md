@@ -478,3 +478,36 @@ Known cost of a fixed value: libraries with genuinely low ambient are
 somewhat over-corrected. Checks (b) leakage and (c) own-marker retention
 are reported per library by 04_2; raw counts stay the base layer, so any
 other value can be produced later.
+
+## 2026-10-02 — 05_3 clustering resolution: rule A (owner-approved, before any clustering)
+
+Recorded before 05_3 has run on any object; the owner has seen Placebo
+UMAPs by mRSS_category (R0024/R0025), so the rule is fixed in writing
+first and is not revisited with outcome in view.
+
+- Graph: SNN on the Harmony PCs of the integration of record
+  (05_1 `integrate_all_cells`); Louvain (Seurat algorithm 1), seed 1.
+- Grid, fixed: resolution 0.05, 0.1, 0.2, 0.3, 0.5, 0.8.
+- Naming: per cluster, mean log-normalised expression of each panel gene
+  (metadata/gene_sets/top_level_panels.yml); each gene z-scored across
+  clusters; panel score = mean of its genes' z. A cluster takes its top
+  panel if top - second >= 1.0, else "ambiguous".
+- Required: wasikowr's 16 broad labels (`required` in the panel file).
+  pDC, plasma, NK are scored and reported, not required — rare types are
+  found in the immune compartment (08-09), where they drive the PCs;
+  plasma is also distorted by the all-cell Harmony (integration_freeze01.md 2d).
+- Choose the LOWEST resolution where (1) every required label is the top
+  call of >= 1 cluster and (2) ambiguous clusters hold <= 5% of cells.
+  If none qualifies: no automatic choice; owner review.
+- Comparison with wasikowr's labels (and jarnagin's immune labels) is a
+  report AFTER the choice, never part of the criterion; resolution 0.1
+  (her top level) is reported alongside.
+- Checks reported with it (decision 2026-10-01): timepoint composition per
+  cluster, Harmony clusters vs clusters on the unintegrated PCA at the
+  chosen resolution; clusters dominated by one patient or one pool.
+
+Rejected: B, the lab's fixed 0.1 (chosen on a different pipeline, clusters
+built on the UMAP; no guarantee rare types separate); C, stability across
+subsamples alone (outcome-free but not tied to biology; costly at 1.2M).
+Panels: drafted 2026-10-02; genes marked `draft` to be reviewed by the
+owner. Not in the Flex panel and so not usable: TPSAB1, TPSB2, CD204.

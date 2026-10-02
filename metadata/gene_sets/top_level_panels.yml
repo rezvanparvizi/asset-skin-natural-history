@@ -1,0 +1,82 @@
+# Top-level marker panels for 05_3 (cluster naming under rule A,
+# decisions.md 2026-10-02, "05_3 clustering resolution: rule A").
+#
+# Keys under `required` are wasikowr's 16 broad labels, spelled as in her
+# objects, so the comparison with her labels needs no name mapping. Keys
+# under `reported` are scored and reported but not required at the top
+# level (found in the immune compartment, stages 08-09).
+#
+# source: lab = from metadata/gene_sets/lab_markers_jarnagin.yml or 04_1's
+#         panels; draft = written 2026-10-02 for owner review.
+# Every gene was checked present in the Flex probe panel (18,123 genes of
+# wasikowr's object) on 2026-10-02. NOT in the panel, so not used:
+# TPSAB1, TPSB2 (tryptase), CD204 (protein name; gene MSR1).
+# 05_3 stops if any gene below is missing from the object.
+
+required:
+  Keratinocytes:
+    genes: [KRT5, KRT14, KRT1, KRT10, KRTDAP, SBSN]
+    source: lab
+  Follicle Cells:
+    genes: [SOX9, LHX2, KRT75, KRT25, KRT71, TCHH]
+    source: draft
+    note: outer root sheath / inner root sheath / matrix genes; KRT15 and KRT17 left out (also basal / activated interfollicular keratinocytes)
+  Sebocytes:
+    genes: [AWAT1, AWAT2, ELOVL3, FADS2, SOAT1]
+    source: draft
+    note: lipid-synthesis genes; PPARG and MGST1 left out (shared with adipocytes / other cells)
+  Eccrine Cells:
+    genes: [DCD, SCGB2A2, SCGB1D2, MUCL1, PIP]
+    source: lab
+    note: 04_1 "Gland" panel
+  Melanocytes:
+    genes: [PMEL, MLANA, DCT, TYRP1]
+    source: lab
+  Fibroblasts:
+    genes: [COL1A1, COL1A2, DCN, LUM, PDGFRA]
+    source: lab
+  Endothelial Cells:
+    genes: [VWF, PLVAP, EMCN, ACKR1, PECAM1]
+    source: draft
+    note: blood-vessel genes; CDH5 / CLDN5 left out (shared with lymphatic endothelium)
+  L Endothelial Cells:
+    genes: [PROX1, LYVE1, CCL21, TFF3, PDPN]
+    source: draft
+  Pericytes:
+    genes: [RGS5, KCNJ8, HIGD1B, PDGFRB]
+    source: draft
+  Smooth Muscle Cells:
+    genes: [MYH11, DES, CNN1, ACTA2]
+    source: draft
+    note: ACTA2 shared with pericytes; MYH11 / DES / CNN1 carry the distinction
+  Adipocytes:
+    genes: [ADIPOQ, PLIN1, PLIN4, LEP, CIDEC]
+    source: draft
+    note: FABP4 left out (also capillary endothelium)
+  T Cells:
+    genes: [CD3D, CD3E, CD3G, CD2, TRAC, IL7R]
+    source: lab
+  B Cells:
+    genes: [MS4A1, CD79A, CD79B, CD19, BANK1, PAX5]
+    source: lab
+  Myeloid Cells:
+    genes: [CD14, CD163, C1QA, CSF1R, LYZ, CD68]
+    source: lab
+  Langerhans Cells:
+    genes: [CD207, CD1A]
+    source: lab
+  Mast Cells:
+    genes: [CPA3, KIT, MS4A2, HDC]
+    source: lab
+    note: lab panel without TPSAB1/TPSB2 (not in the Flex panel); HDC added
+
+reported:
+  pDC:
+    genes: [LILRA4, CLEC4C, IL3RA]
+    source: lab
+  Plasma Cells:
+    genes: [MZB1, JCHAIN, DERL3, TNFRSF17]
+    source: draft
+  NK Cells:
+    genes: [KLRF1, NCAM1, GNLY, NKG7]
+    source: lab
