@@ -511,3 +511,30 @@ built on the UMAP; no guarantee rare types separate); C, stability across
 subsamples alone (outcome-free but not tied to biology; costly at 1.2M).
 Panels: drafted 2026-10-02; the `draft` panels were approved by the
 owner the same day. Not in the Flex panel and so not usable: TPSAB1, TPSB2, CD204.
+
+## 2026-10-02 — Clinical and bulk sample metadata: scripts-only access, in-place Excel edits with backup
+
+Owner decision, for the bulk/clinical metadata work (sample-ID matching,
+bulk skin QC, bulk availability per patient, consistency checks):
+- **Scripts only.** AI agents write R scripts that read data/clinical/ and
+  data/bulk/; agents see only column names, counts and pass/fail
+  summaries. Anything with IDs or values (mismatch lists, suggested
+  corrections, per-sample QC) is written to data/patient_level/ for the
+  owner. The deny rules and AGENTS.md access rules stay unchanged.
+  Extends the 2026-10-01 metadata/design/ exception to two more
+  agent-readable tables with no values: the clinical/bulk FILE inventory
+  (file, sheet, rows, columns) and the COLUMN inventory (name, type,
+  missing and distinct counts).
+- **Excel edits in place, after a backup.** Before a script adds columns
+  to an owner workbook, it copies the original to data/clinical/backup/
+  (read-only); the run_id goes in the backup's subfolder, not in the file
+  name. openxlsx is used so formatting is kept (installed 2026-10-02,
+  recorded in renv.lock; the snapshot had dropped the Bioconductor 3.23
+  pin, restored by hand).
+- **Blood QC code**: the owner copies data/bulk/blood/1.3_TPM_70_samples.R
+  and 1.4_QC_70_samples.R into the repo, so skin QC reuses the same metric
+  definitions.
+
+Rejected: direct agent reading of the clinical workbooks — would send
+patient-level data to an external AI service; not covered by the current
+access rules.
