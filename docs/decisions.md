@@ -444,3 +444,37 @@ discuss on 2026-10-02. Until her sample sheet, the identity of repeats
 #32/#68 and the chemistry question are settled, no freeze02 work starts
 (no copying, no freeze02.yml). All analysis continues on freeze01
 (218 libraries). Findings so far: docs/data_issues_freeze01.md.
+
+## 2026-10-02 — SoupX rho fixed at 0.13 for every library (supersedes the autoEstCont rule)
+
+Owner decision: one fixed rho, the same for all 218 libraries, chosen
+between 0.13 and 0.15; no marker-based per-library estimation (no reliable
+clusters yet). Value chosen: **0.13**. Applied by
+04_2_correct_ambient_fixed_rho.R (clusters and soup from 04_1/R0020);
+corrected counts in data/bpcells/freeze01/counts_corrected/. 05 re-runs
+on them.
+
+Why change: autoEstCont gave median 0.054 (counts removed 5.4%) and its
+prior is centred near 0.05; keratin/collagen leakage only halved. A
+marker-based reading of R0020's own tables (gene-set share in cells that
+cannot express it / its share of the soup) gave medians 0.121 (keratin in
+immune-labelled cells), 0.127 (keratin in fibroblast-labelled), 0.146
+(collagen in immune-labelled) — upper-biased by the noisy provisional
+labels and doublets. Rare and low-UMI populations will be analysed later,
+where residual keratin/collagen would distort profiles.
+
+Why 0.13 rather than 0.15: the keratin estimates (0.121, 0.127) rest on
+the largest soup share (4.2% of the soup, all 218 libraries) and are the
+most stable; the collagen estimate rests on a 1.3% soup share and the
+noisier immune label; all three are upper-biased, so the centre of the
+keratin estimates is the safer side. wasikowr's pipeline uses 0.1.
+
+Rejected: (a) autoEstCont as before — likely under-corrects; (b) 0.15 —
+nearer the upper-biased bound; (c) per-library autoEstCont scaled to a
+median of 0.13 — keeps the pool differences (rho tracks pool, p = 4e-7)
+but rests on per-library estimates that agree only moderately with the
+marker reading (Spearman 0.59) and would push extremes to ~0.33.
+Known cost of a fixed value: libraries with genuinely low ambient are
+somewhat over-corrected. Checks (b) leakage and (c) own-marker retention
+are reported per library by 04_2; raw counts stay the base layer, so any
+other value can be produced later.

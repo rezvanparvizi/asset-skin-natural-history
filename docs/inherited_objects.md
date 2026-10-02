@@ -4,6 +4,9 @@ Provenance for anything copied from a colleague's directory. **Write
 the entry the day you copy the file**, not later — the details you need
 are the ones you forget first.
 
+Files read in place (not copied) — colleagues' paths, object contents and
+findings — are recorded in `lab_sources.md`.
+
 ## Why this file exists
 
 Three failure modes it prevents:

@@ -160,7 +160,8 @@ docs/
   ENVIRONMENT.md         every environment decision and its reasoning
   runs.csv               append-only registry of every run + verdict
   decisions.md           dated log of judgment calls
-  inherited_objects.md   provenance of anything from a colleague
+  inherited_objects.md   provenance of anything copied from a colleague
+  lab_sources.md         what is where in colleagues' directories (read first)
   data_dictionary.md     field definitions
   figure_manifest.md     figure -> script that makes it
   server_notes.md        screen, Positron, SSH, VPN
@@ -414,6 +415,19 @@ rather than importing a testing framework.
   this data. Most of the fibrosis-regression literature is (b).
 - If a script you produced has a bug, say so plainly rather than letting the
   owner assume operator error.
+- **Record what you find in colleagues' directories.** Before opening
+  anything in a colleague's directory, read `docs/lab_sources.md`. When you
+  investigate their files or objects (paths, object contents, sample lists,
+  settings, cell counts, CellRanger locations), write the findings into
+  `docs/lab_sources.md` in the same session, with the date — so the next
+  session does not have to repeat the check. If the investigation produces
+  output beyond a summary (a table, a barcode- or patient-level file),
+  ask the owner whether and where to save it; never leave it only in the
+  conversation or in a scratch directory without saying so.
+- **No pseudocode.** Code in scripts, docs and replies is real code that runs
+  in this repository's environment. If something cannot be filled in (an
+  unknown path, column or parameter), say what is missing and ask, instead
+  of writing placeholder or sketch code.
 
 
 ## Rules for AI agents working in this repository

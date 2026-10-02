@@ -9,21 +9,40 @@ organised; this says where we are.
 items to Done, revise In flight, add anything newly blocked. If it goes stale
 it becomes worse than nothing, because it will be believed.
 
-Last updated: **2026-10-01** · Updated by: Rezvan Parvizi (with Claude Code)
+Last updated: **2026-10-02** · Updated by: Rezvan Parvizi (with Claude Code)
 
 ---
 
 ## Current focus
 
 **Project 1** — molecular basis of spontaneous mRSS improvement in the ASSET
-placebo arm. freeze01 (218 libraries): stage 00, cell QC (03_1), SoupX
-(04_1, accepted) and the upstream comparison (06_0) are done. The
-first-pass integration (05_1, R0022) was running overnight. freeze02 is
-ON HOLD (owner decision) pending the conversation with wasikowr.
+placebo arm. freeze01 (218 libraries): stage 00, cell QC (03_1) and the
+upstream comparison (06_0) are done. Ambient correction re-done with a
+fixed rho = 0.13 (04_2, decisions.md 2026-10-02) and integration re-run on
+those counts (05_1 -> 05_2), in flight. Next: 05_3 top-level clustering,
+criterion to be agreed first. freeze02 is ON HOLD (owner decision).
 
 ---
 
 ## Done
+
+### 2026-10-02 — integration review, SoupX re-decided, colleague findings
+
+- Integration R0022 reviewed (docs/integration_freeze01.md): Harmony on
+  pool keeps within-patient timepoint structure exactly; pool effect at
+  chance in large lineages (across-patient check); rare types (plasma,
+  mural) distorted -> compartment-level re-integration later; HC aligned to
+  SSc by construction. Pool vs mRSS_category: no subject-level confounding
+  (p = 0.59) but pools are small patient groups. 05_2 extended (R0025).
+- SoupX: autoEstCont rho (median 0.054) judged too low; owner chose a fixed
+  rho; 0.13 recorded (decisions.md). 04 split: 04_1 estimate (R0020),
+  04_2 apply fixed rho. wasikowr uses rho 0.1; her counts are ~30% below
+  CellRanger h5 for a non-ambient reason (asked).
+- jarnagin's `==` bug quantified: base_control holds ~half the
+  Baseline+Control cells; all Baseline_Analysis downstream affected; B-cell
+  concentration in few patients is real (data_issues_freeze01.md).
+- New docs/lab_sources.md (what is where in colleagues' directories);
+  AGENTS.md rules: record colleague findings, no pseudocode.
 
 ### 2026-10-01 — nomenclature, design table, cell QC
 
@@ -114,14 +133,11 @@ ON HOLD (owner decision) pending the conversation with wasikowr.
 
 ## In flight
 
-- **R0022 `05_1_harmony_batch_first_pass`** (started 2026-10-01 21:48 UTC,
-  8 threads, screen session). PCA done (49 PCs, the lab's sd rule found
-  no elbow); Harmony on batch_id then UMAPs. Check
-  `logs/20261001_214856_05_1_*.log` and
-  `results/freeze01/reference/05_sc_integration/harmony_batch_first_pass/INTEGRATION_SUMMARY.txt`.
-  Review the integration checks BEFORE the Placebo panels.
-- Conversation with wasikowr on 2026-10-02 — agenda at the end of
-  `docs/data_issues_freeze01.md`.
+- **Chain 04_2 -> 05_1 -> 05_2** (started 2026-10-02 18:16 UTC, screen
+  `asset_chain`, log `logs/20261002_181642_chain_04_2_to_05_2.log`):
+  fixed-rho correction (R0026), integration on the new counts, checks.
+  Runs registered git_dirty (started before the commit). Then review the
+  05_2 checks against docs/integration_freeze01.md and supersede R0022/R0025.
 
 ---
 
@@ -143,11 +159,12 @@ ON HOLD (owner decision) pending the conversation with wasikowr.
 
 ## Next up, in order
 
-1. **Review R0022** with the owner: integration checks, then the Placebo
-   UMAPs by mRSS_category (4 panels; M00 only and all timepoints).
-2. **05_2 clustering**: resolution fixed on marker criteria and recorded
-   in decisions.md BEFORE looking at mRSS_category; per-cluster
-   timepoint composition before/after Harmony.
+1. **Review the new 04_2 / 05_2 results** (retention at rho 0.13;
+   integration checks as in docs/integration_freeze01.md).
+2. **05_3 top-level clustering**: criterion agreed with the owner and
+   recorded in decisions.md BEFORE any clusters exist; per-cluster
+   timepoint composition (Harmony vs unintegrated), patient/pool
+   dominance, marker presence in the Flex panel.
 3. **Broad labels**: wasikowr's 16 labels (barcode table requested) +
    our marker checks (06_0 tables).
 4. **Per-cell-type QC check** once clusters exist (does the 500-UMI
@@ -262,4 +279,8 @@ Detail belongs in `docs/decisions.md` (judgment) and `docs/runs.csv` (runs).
             Found 23 newer libraries in her object (freeze02, on hold).
             Run-id race fixed in provenance.R. Unpushed history scrubbed
             of Subject_IDs/specimen codes before push.
+2026-10-02  Integration R0022 reviewed and checks extended (R0025).
+            jarnagin's subset bug quantified. SoupX re-decided: fixed rho
+            0.13 (04_2); chain 04_2 -> 05_1 -> 05_2 launched. wasikowr's
+            counts ~30% below h5 (not ambient). docs/lab_sources.md.
 ```

@@ -1,20 +1,22 @@
 # ==============================================================
-# 05_1_harmony_batch_first_pass.R
+# 05_1_integrate_all_cells.R
 #
-# First-pass Layer-1 embedding of ALL cells (all arms, timepoints, HC):
-# SoupX-corrected counts -> LogNormalize -> 2,000 HVG -> PCA -> Harmony
-# on batch_id (pool) ONLY -> UMAP. Approved plan: docs/decisions.md,
-# 2026-10-01, "Integration (stage 05)".
+# Layer-1 embedding of ALL cells (all arms, timepoints, HC):
+# ambient-corrected counts (04_2, fixed rho) -> LogNormalize -> 2,000 HVG
+# -> PCA -> Harmony on batch_id (pool) ONLY -> UMAP. Approved plan:
+# docs/decisions.md, 2026-10-01, "Integration (stage 05)"; counts from
+# 2026-10-02, "SoupX rho fixed at 0.13". (Run R0022 was the same code on
+# 04_1's automatic-rho counts, as 05_1_harmony_batch_first_pass.R.)
 #
 # This script computes and saves only: the object (PCA, Harmony, UMAP)
 # to data/objects/, the Harmony UMAP and an unintegrated UMAP of a random
 # subset to objects/. The integration checks and the owner's Placebo
-# figures are made by 05_2_plot_first_pass_integration.R from these.
+# figures are made by 05_2_assess_integration_all_cells.R from these.
 #
 # No clustering here, so no resolution is chosen with mRSS_category in
 # view (rule 3).
 #
-#   OMP_NUM_THREADS=8 jobs/run.sh analysis/05_sc_integration/05_1_harmony_batch_first_pass.R \
+#   OMP_NUM_THREADS=8 jobs/run.sh analysis/05_sc_integration/05_1_integrate_all_cells.R \
 #     --freeze freeze01 --cohort reference
 # ==============================================================
 
@@ -34,33 +36,37 @@ suppressPackageStartupMessages({
 })
 
 INT <- list(n_hvg = 2000, max_pcs = 50, pc_sd_ratio = 0.995, min_pcs = 15,
-            harmony_by = "batch_id", umap_neighbors = 30, umap_min_dist = 0.3,
+            harmony_by = "batch_id", counts_subdir = "counts_corrected",
+            ambient_run = "correct_ambient_fixed_rho", umap_neighbors = 30, umap_min_dist = 0.3,
             unintegrated_cells = 300000, plot_cells = 300000,
             mixing_cells = 100000, mixing_k = 30, panel_max_cells = 20000, seed = 1)
 CAT_LEVELS <- c("Improver", "Stable", "Worsened", "Set_aside")
 
 run <- init_run(
   stage    = "05_sc_integration",
-  run_name = "harmony_batch_first_pass",
+  run_name = "integrate_all_cells",
   params   = INT,
-  notes    = "All cells; SoupX counts; Harmony on batch_id only; mixing checks; Placebo UMAPs by mRSS_category"
+  notes    = "All cells; fixed-rho ambient-corrected counts (04_2); Harmony on batch_id only; checks in 05_2"
 )
 THREADS <- as.integer(Sys.getenv("OMP_NUM_THREADS", "4"))
 set.seed(INT$seed)
 
-# ---- 1. counts: merge per-library SoupX matrices on disk -----
+# ---- 1. counts: merge per-library corrected matrices on disk --
 
 man <- freeze_libraries()
 sx_cells <- fread(file.path(results_dir("04_sc_ambient", "soupx_per_library", cohort = "reference"),
                             "objects", "soupx_cells.csv.gz"))
-sx_dir <- file.path(BPCELLS, FREEZE, "counts_soupx")
+amb_summary <- file.path(results_dir("04_sc_ambient", INT$ambient_run, cohort = "reference"),
+                         "AMBIENT_SUMMARY.txt")
+if (!file.exists(amb_summary)) stop("04_2 has not completed: ", amb_summary, call. = FALSE)
+sx_dir <- file.path(BPCELLS, FREEZE, INT$counts_subdir)
 miss <- man$library_id[!dir.exists(file.path(sx_dir, man$library_id))]
-if (length(miss)) stop("SoupX matrices missing for: ", paste(miss, collapse = ", "), call. = FALSE)
+if (length(miss)) stop("Corrected matrices missing for: ", paste(miss, collapse = ", "), call. = FALSE)
 
 mats  <- lapply(man$library_id, function(l) open_matrix_dir(file.path(sx_dir, l)))
 genes <- rownames(mats[[1]])
 stopifnot(all(vapply(mats, function(m) identical(rownames(m), genes), logical(1))))
-merged_dir <- file.path(BPCELLS, FREEZE, "merged_soupx")
+merged_dir <- file.path(BPCELLS, FREEZE, "merged_counts_corrected")   # R0022's merged_soupx/ is left intact
 if (dir.exists(merged_dir)) unlink(merged_dir, recursive = TRUE)
 counts <- write_matrix_dir(do.call(cbind, mats), merged_dir)
 rm(mats)
@@ -92,11 +98,13 @@ sv  <- Stdev(obj, "pca")
 idx <- which(sv[-1] > INT$pc_sd_ratio * sv[-length(sv)])          # lab rule (reembed())
 pc_dim <- max(INT$min_pcs, if (length(idx)) min(idx) + 1 else length(sv))
 message("PCs used: ", pc_dim)
+save_table(data.table(pc = seq_along(sv), stdev = sv), run, "pca_stdev")
 
 # ---- 4. Harmony on pool, UMAP --------------------------------
 
 obj <- RunHarmony(obj, group.by.vars = INT$harmony_by, reduction.use = "pca",
-                  dims.use = seq_len(pc_dim), reduction.save = "harmony", verbose = FALSE)
+                  dims.use = seq_len(pc_dim), reduction.save = "harmony",
+                  verbose = TRUE)                                # iterations / convergence in the log
 um <- uwot::umap(Embeddings(obj, "harmony")[, seq_len(pc_dim)],
                  n_neighbors = INT$umap_neighbors, min_dist = INT$umap_min_dist,
                  n_threads = THREADS, seed = INT$seed)
@@ -114,7 +122,7 @@ fwrite(data.table(cell_id = sub_cells, un_1 = un[, 1], un_2 = un[, 2]),
 
 # scale.data (dense, ~19 GB at this size) is not kept; counts stay on disk
 saveRDS(DietSeurat(obj, layers = c("counts", "data"), dimreducs = c("pca", "harmony", "umap")),
-        file.path(OBJ, sprintf("%s_reference_harmony_first_pass.rds", FREEZE)))
+        file.path(OBJ, sprintf("%s_reference_integrated_all_cells.rds", FREEZE)))
 emb <- data.table(cell_id = colnames(obj),
                   UMAP_1 = Embeddings(obj, "umap")[, 1], UMAP_2 = Embeddings(obj, "umap")[, 2])
 fwrite(emb, file.path(run$objects, "umap_harmony.csv.gz"))

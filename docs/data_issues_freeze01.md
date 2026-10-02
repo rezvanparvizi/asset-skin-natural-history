@@ -238,3 +238,39 @@ that the cell type metadata is missing; objects need library(BPCells).
 6. **How many samples are still waiting to be sequenced.**
 7. **13639-JF-11 / -12** (one patient, both labelled Month 3): which is
    Baseline?
+
+## Recycling-subset bug: affected objects and cell loss (checked 2026-10-02)
+
+`Baseline_Analysis/1a_Baseline.R:90` `subset(orig_obj, time == c("Baseline","Control"))`.
+Affected object: `ASSET_base_control.RDS` (+ `base_control_BPCells/`), 181,766
+cells. Everything in `Baseline_Analysis/` descends from it (1b -> integer
+object -> 1d/1e -> 3d Subtyped_res0p3 -> 4e LineageCalls -> 1f
+BcellPlasma_Clean -> 1g, 5b-5g), plus the fibroblast branch (3a-3c,
+Steele), 4a T cells (restricted to `ASSET_base_control_cohort_barcodes.txt`),
+TCAT `basecontrol` cohort, and the MuSiC/Scaden reference
+(`BulkRNAseq_Analysis/1a`, 1b, 1d, Scaden/4). `FullDataset_Analysis/` does
+not use it.
+
+Loss: wasikowr's object has ~382,400 Baseline+Control cells in our 83
+libraries (329,174 SSc M00 + 53,212 HC); base_control keeps 181,766
+(47% / 49%), ~200,600 cells lost. The drop is every other cell, so it is
+uniform across samples and cell types.
+
+B cells (same labels: her full-dataset Round2_immFilt, Baseline+Control,
+barcodes in base_control or not; scratch check, aggregate only):
+1,648 -> 836 (51% kept). Samples with >0 B cells 72 -> 67; with >3 (her
+1e cutoff) 51 -> 40, so 11 samples were moved to "No B cells" by the bug;
+with >10, 34 -> 18. Share of B cells in the top 5 samples: 57% either way.
+So the bug halved B-cell numbers and inflated the "no B cells" group, but
+the concentration of B cells in a few patients is present in the full data
+too. T cells 6,920 -> 3,442; myeloid 17,076 -> 8,455.
+
+## wasikowr's counts vs CellRanger h5 (2026-10-02)
+
+Her pipeline uses SoupX rho = 0.1 (her answer to the owner). Separately,
+her counts (seurat.RDS / ASSET_base_control.RDS) hold ~30% fewer UMIs than
+the CellRanger h5 for the same cells, and the loss is near-uniform across
+genes (soup genes lose less than average), so it is not the ambient
+correction. Ask: which CellRanger output / settings built seurat.RDS, and
+is any step after SoupX rescaling counts? Details:
+docs/ambient_soupx_freeze01.md.
