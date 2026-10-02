@@ -195,3 +195,22 @@ The SoupX re-assessment (docs/ambient_soupx_freeze01.md) suggests our rho
 rho rule, the counts feeding 05_1 change and 05_1 + 05_2 must be re-run.
 The integration design and checks stay the same; acceptance of the
 embedding should wait for that decision.
+
+## 6. Integration of record: fixed-rho counts (R0028 + R0034, 2026-10-02)
+
+Same design (05_1 `integrate_all_cells`, 05_2 `assess_integration_all_cells`)
+on the rho = 0.13 counts (04_2, R0026). Supersedes R0022 / R0025. Object:
+`data/objects/freeze01_reference_integrated_all_cells.rds`.
+
+- PCs: the lab's sd rule now finds an elbow at **30** (was 49 of 50 on the
+  autoEstCont counts; sd PC30/PC1 = 0.215). Less ambient, cleaner structure.
+- **Harmony converged after 6 iterations** (now logged).
+- Within patient, timepoint separation unchanged: median per-patient
+  Harmony/PCA ratio 1.00 (53 one-pool patients), 0.99 (21 multi-pool).
+- Pool among other-patient neighbours (Harmony): fibroblast 0.98,
+  endothelial 1.06, immune 1.05, keratinocyte 1.05 (from 1.18), gland 1.02,
+  melanocyte 1.16; **mural 1.23 and plasma 2.10 still distorted** —
+  compartment-level integration needed, as before.
+- Global: patient 3.72 -> 2.93, pool 1.74 -> 1.42, timepoint 1.12 -> 1.06.
+Assessment unchanged from section 3: accepted for top-level clustering
+(05_3); rare populations from compartment-level PCA + Harmony.
