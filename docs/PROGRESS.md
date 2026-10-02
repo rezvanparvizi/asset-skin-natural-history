@@ -201,8 +201,9 @@ shallower than M06 (median UMI 1,238 vs 1,401, p = 0.001; a few poor M00
 libraries). Decide before stage 14 whether longitudinal pseudobulk models
 carry a library-quality covariate (data_issues_freeze01.md).
 
-**Bulk skin inputs.** No sample sheet / README for the 234 skin columns;
-two symbol-level count matrices. Questions in docs/bulk_skin_readiness.md.
+**Bulk metadata.** Cleaned 2026-10-02; read the workbooks directly and
+filter on `Use_downstream` (docs/clinical_metadata.md). Open: autoantibody
+and escape columns (owner confirming), canonical skin count matrix.
 
 **Primary timepoint.** Escape is no longer a concern for tissue (no Placebo
 escape before the M06 biopsy). The owner wants M00 alone and all

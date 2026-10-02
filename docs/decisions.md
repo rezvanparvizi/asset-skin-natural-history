@@ -538,3 +538,18 @@ bulk skin QC, bulk availability per patient, consistency checks):
 Rejected: direct agent reading of the clinical workbooks — would send
 patient-level data to an external AI service; not covered by the current
 access rules.
+
+## 2026-10-02 — Bulk metadata finalised; one-time fix scripts removed
+
+Owner decision: the cleaned workbooks in data/clinical/ are the source of
+truth, read directly. `Use_downstream` added to the PBMC workbook (67:
+drop QC exclude_suggested; one sample per subject, preferring QC "ok", then
+the deeper library). The one misspelt skin matrix column header was
+corrected in the 6 matrices, so no rename map exists any more. One-time
+scripts 00_5-00_8 and 01_2 removed from the repo (recoverable at the git
+sha in docs/runs.csv); their results/ folders are kept as run records. Kept:
+backup/R0033 (originals) and the autoantibody/escape disagreement list.
+The owner's blood QC script is not kept in the repo (it holds IDs); the
+blood metric definitions are documented in 01_1 and clinical_metadata.md.
+Supersedes the "copy blood QC script into the repo" point of the
+scripts-only entry above.

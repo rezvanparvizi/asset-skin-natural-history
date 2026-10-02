@@ -2,8 +2,8 @@
 # 01_1_qc_bulk_skin_samples.R
 #
 # Per-sample QC of the 234 bulk skin samples, with the SAME metrics and
-# rules as the owner's PBMC QC (analysis/02_bulk_pbmc/1.4_QC_70_samples.R,
-# gitignored), and the final "use downstream" column. Results are added to
+# rules as the owner's PBMC QC (her 1.4_QC_70_samples.R, kept outside the
+# repo with the blood data), and the final "use downstream" column. Results are added to
 # the skin workbook in place, after a backup (decisions.md 2026-10-02).
 #
 # Metrics (as blood): raw_library_size (column sums of the Ensembl raw
@@ -20,8 +20,6 @@
 # Use_downstream = "Yes" if Exclude and Repeat are blank AND QC_flag is not
 # "exclude_suggested"; otherwise "No", with Use_reason.
 #
-# Matrix column fixes from 00_7 (data/clinical/bulk_skin_matrix_column_fixes.csv)
-# are applied when reading the matrices.
 # Counts and plots to results/; per-sample values to data/patient_level/.
 #
 #   jobs/run.sh analysis/01_bulk_skin/01_1_qc_bulk_skin_samples.R --freeze freeze01 --cohort reference
@@ -56,12 +54,9 @@ run <- init_run(
 skin <- as.data.table(read_excel(file.path(CLINICAL, P$skin_file), col_types = "text"))
 # blank cells in the owner's workbooks are often the text "NA": treat as missing in any logic
 na_txt <- function(v) { v[!is.na(v) & toupper(trimws(v)) %in% c("NA", "")] <- NA; v }
-fix_file <- file.path(CLINICAL, "bulk_skin_matrix_column_fixes.csv")
-fixes <- if (file.exists(fix_file)) fread(fix_file) else data.table(matrix_column = character(), correct_Sample_ID = character())
 read_mat <- function(f) {
   m <- fread(file.path(BULK, f))
   ids <- names(m)[-1]
-  ids[ids %in% fixes$matrix_column] <- fixes$correct_Sample_ID[match(ids[ids %in% fixes$matrix_column], fixes$matrix_column)]
   keep <- ids %in% skin$Sample_ID                                  # drops annotation columns
   x <- as.matrix(m[, -1][, ..keep]); colnames(x) <- ids[keep]; rownames(x) <- m[[1]]
   x[, skin$Sample_ID]
