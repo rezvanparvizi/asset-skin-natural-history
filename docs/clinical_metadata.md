@@ -74,13 +74,13 @@ same 8 second samples. `ASSETpaper_2022` marks the 140 samples used in the
 PBMC: `QC_flag` = `ok` 62, `check` 6, `exclude_suggested` 2 (owner's QC).
 One subject has two PBMC samples.
 
-## Coverage (from 00_5, R0030)
+## Coverage (from 00_5, R0031)
 
 - Master subjects with >= 1 skin bulk sample: 84 / 88; with PBMC: 69 / 88.
 - All skin and PBMC Subject_IDs exist in the master.
 - Per-patient availability column in the master: **pending** (item 5).
 
-## Inconsistencies found (2026-10-02; R0030, R0031) — details for the owner
+## Inconsistencies found (2026-10-02; 00_5 R0031, 00_6 R0032) — details for the owner
 
 ID-level lists: `data/patient_level/freeze01/reference/00_manifest_and_batch/`
 `check_bulk_sample_metadata/consistency_details.csv` and
