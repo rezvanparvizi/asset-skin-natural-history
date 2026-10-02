@@ -284,3 +284,22 @@ KIT), plus superseded copies in both 4a/4b. The mast call there rests on
 the remaining genes only (silently, like SFPR4). Our dictionary's CD204 is
 a protein name (gene MSR1). Worth a check of every lab gene list against
 the panel; 05_3 now stops on any missing panel gene.
+
+## Library quality differs by timepoint (found 2026-10-02; 03_2 R0027, 03_3)
+
+SSc libraries (03_1 library table): median UMI per cell M00 1,238, M03
+1,242, M06 1,401 (Kruskal p = 0.001); cells per library M00 3,791, M03
+4,290, M06 6,114. Cells failing the 500-UMI / 200-gene floor: median
+library ~1% at every timepoint, but mean 3.0% at M00 vs 0.9% at M06 — 4 M00
+libraries lose > 10% (1 at M03, 0 at M06); the top 5 M00 libraries hold
+60% of all M00 floor failures. Per cell type (colleagues' labels, 03_3)
+every type, fibroblasts included, fails ~2x more at M00 than M06: the
+loss is library quality, not cell-type specific.
+Not pool: pool is independent of timepoint (00_2). Cause unknown
+(observation (c)) — block age, processing order, biopsy handling?
+Consequences: QC loss itself is small (<= 6% per type); but technical
+depth differing by timepoint can masquerade as M00 -> M06 change in DE.
+Proposal (owner to decide before stage 14): a library-quality covariate
+(e.g. log median UMI) in longitudinal pseudobulk models, or a sensitivity
+analysis without the low-quality M00 libraries. Ask the core/jarnagin
+whether baseline blocks were cut or processed differently.

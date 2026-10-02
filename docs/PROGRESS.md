@@ -196,6 +196,14 @@ binary is comparable to prior work, continuous is better powered with ~19 vs
 Set_aside) from the clinical master table**; calls may be revised by the
 PI. Formal outcome for inference still to be stated before any test.
 
+**Library quality covariate (new 2026-10-02).** M00 libraries are
+shallower than M06 (median UMI 1,238 vs 1,401, p = 0.001; a few poor M00
+libraries). Decide before stage 14 whether longitudinal pseudobulk models
+carry a library-quality covariate (data_issues_freeze01.md).
+
+**Bulk skin inputs.** No sample sheet / README for the 234 skin columns;
+two symbol-level count matrices. Questions in docs/bulk_skin_readiness.md.
+
 **Primary timepoint.** Escape is no longer a concern for tissue (no Placebo
 escape before the M06 biopsy). The owner wants M00 alone and all
 timepoints. **Which is primary for inference: not yet decided.**
