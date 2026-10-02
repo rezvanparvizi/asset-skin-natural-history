@@ -164,6 +164,7 @@ docs/
   lab_sources.md         what is where in colleagues' directories (read first)
   data_dictionary.md     field definitions
   qc_freeze01.md         cell/library QC report; libraries driving the timepoint quality gap
+  clinical_metadata.md   clinical + bulk sample files: paths, keys, codings, how to filter (read first)
   figure_manifest.md     figure -> script that makes it
   server_notes.md        screen, Positron, SSH, VPN
 data/ results/ figures/ logs/    [symlinks to large storage, gitignored]
