@@ -18,9 +18,10 @@ Last updated: **2026-10-02** · Updated by: Rezvan Parvizi (with Claude Code)
 **Project 1** — molecular basis of spontaneous mRSS improvement in the ASSET
 placebo arm. freeze01 (218 libraries): stage 00, cell QC (03_1) and the
 upstream comparison (06_0) are done. Ambient correction re-done with a
-fixed rho = 0.13 (04_2, decisions.md 2026-10-02) and integration re-run on
-those counts (05_1 -> 05_2), in flight. Next: 05_3 top-level clustering,
-criterion to be agreed first. freeze02 is ON HOLD (owner decision).
+fixed rho = 0.13 (04_2, R0026); integration of record R0028 (05_1) checked
+by R0034 (05_2). 05_3 top-level clustering (rule A, decisions.md) is
+running. Bulk metadata cleaned (docs/clinical_metadata.md). freeze02 is ON
+HOLD (owner decision).
 
 ---
 
@@ -43,6 +44,19 @@ criterion to be agreed first. freeze02 is ON HOLD (owner decision).
   concentration in few patients is real (data_issues_freeze01.md).
 - New docs/lab_sources.md (what is where in colleagues' directories);
   AGENTS.md rules: record colleague findings, no pseudocode.
+- Integration of record on rho 0.13 counts: R0028 (30 PCs, Harmony
+  converged in 6 iterations) + R0034 checks; R0022/R0025 superseded.
+- 05_3 rule A recorded before clustering (decisions.md); top-level marker
+  panels approved (metadata/gene_sets/top_level_panels.yml). TPSAB1/TPSB2
+  are not in the Flex panel (lab mast panels affected).
+- QC by cell type (03_2, R0027) and by timepoint (03_3, R0029): M00
+  libraries are shallower; libraries listed in docs/qc_freeze01.md.
+- Bulk/clinical metadata (owner's three workbooks, scripts-only access):
+  IDs checked against all matrices; skin coding and mRSS_category fixed;
+  skin QC with the PBMC metrics (01_1, R0036; all 9 outliers already in
+  the owner's Exclude); `Use_downstream` in skin (219) and PBMC (67);
+  master `Bulk_baseline_data`; misspelt skin matrix header corrected.
+  One-time scripts removed. docs/clinical_metadata.md.
 
 ### 2026-10-01 — nomenclature, design table, cell QC
 
@@ -133,11 +147,13 @@ criterion to be agreed first. freeze02 is ON HOLD (owner decision).
 
 ## In flight
 
-- **Chain 04_2 -> 05_1 -> 05_2** (started 2026-10-02 18:16 UTC, screen
-  `asset_chain`, log `logs/20261002_181642_chain_04_2_to_05_2.log`):
-  fixed-rho correction (R0026), integration on the new counts, checks.
-  Runs registered git_dirty (started before the commit). Then review the
-  05_2 checks against docs/integration_freeze01.md and supersede R0022/R0025.
+- **05_3 `cluster_top_level`** (R0039, started 2026-10-02 21:53 UTC;
+  R0038 failed on future.globals.maxSize, fixed). Log
+  `logs/20261002_215353_05_3_cluster_top_level_freeze01_reference.log`;
+  summary `results/freeze01/reference/05_sc_integration/cluster_top_level/CLUSTER_SUMMARY.txt`.
+  Read the rule A sweep first; if no resolution qualifies, the rule says
+  owner review, not an automatic choice. Do NOT look at mRSS_category with
+  the clusters.
 
 ---
 
@@ -159,26 +175,26 @@ criterion to be agreed first. freeze02 is ON HOLD (owner decision).
 
 ## Next up, in order
 
-1. **Review the new 04_2 / 05_2 results** (retention at rho 0.13;
-   integration checks as in docs/integration_freeze01.md).
-2. **05_3 top-level clustering**: criterion agreed with the owner and
-   recorded in decisions.md BEFORE any clusters exist; per-cluster
-   timepoint composition (Harmony vs unintegrated), patient/pool
-   dominance, marker presence in the Flex panel.
-3. **Broad labels**: wasikowr's 16 labels (barcode table requested) +
-   our marker checks (06_0 tables).
-4. **Per-cell-type QC check** once clusters exist (does the 500-UMI
-   floor or MT cut deplete a lineage?).
-5. **Colleague meeting** on `docs/data_issues_freeze01.md`.
-6. Bulk skin (later): needs the column -> Subject_ID/timepoint map (no sample
-   sheet in data/bulk/skin) and which gene-symbol matrix is canonical.
+1. **Review 05_3 with the owner**: rule A sweep and chosen resolution;
+   timepoint composition per cluster (Harmony vs unintegrated PCA);
+   patient/pool-dominated clusters; agreement with wasikowr's and
+   jarnagin's labels (report only).
+2. **Stage 06, broad labels**: freeze the top-level labels; lab pocket
+   screen / doublet routine (flag, not delete). Plan for owner review first.
+3. **Compartment stages 07-11**: PCA + Harmony per compartment; repeat the
+   within-patient and across-patient pool checks (plasma, mural, B).
+   Per-compartment QC loss by timepoint (qc_freeze01.md).
+4. **Colleague meeting**: docs/data_issues_freeze01.md (subset bug,
+   tryptase genes, wasikowr's counts ~30% below h5, freeze02 samples).
+5. **Bulk skin stage 01 analysis**: choose the canonical count matrix
+   (proposal: Ensembl raw counts, our own symbol mapping); filter on
+   `Use_downstream`.
 6. freeze02: 23 newer libraries ALREADY exist (wasikowr, processed Aug
    2026; see data_issues_freeze01.md). 21 are repeats of low-yield
    freeze01 libraries, 2 are unidentified. Waiting on wasikowr's sample
    sheet; then `freeze02.yml` (00_0 must handle the flat CellRanger
    layout) and decide merge_strategy per repeated biopsy.
-7. Deferred from before: backfill environment decisions; backup script;
-   bulk skin stage 01 once the owner has placed the inputs.
+7. Deferred from before: backfill environment decisions; backup script.
 
 ---
 
@@ -292,4 +308,8 @@ Detail belongs in `docs/decisions.md` (judgment) and `docs/runs.csv` (runs).
             jarnagin's subset bug quantified. SoupX re-decided: fixed rho
             0.13 (04_2); chain 04_2 -> 05_1 -> 05_2 launched. wasikowr's
             counts ~30% below h5 (not ambient). docs/lab_sources.md.
+            Integration of record R0028/R0034 (rho 0.13). Rule A + panels
+            for 05_3; 05_3 running. QC by timepoint (qc_freeze01.md).
+            Bulk/clinical workbooks cleaned via scripts; Use_downstream
+            in skin (219) and PBMC (67); one-time scripts removed.
 ```

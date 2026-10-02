@@ -125,3 +125,15 @@ Not yet settled, and it matters:
   papers 01 and 03; continuous is better powered with ~19 vs ~19.
 
 Record the choice in `docs/decisions.md` when made.
+
+## Clinical master and bulk sample workbooks  [data/clinical/, not in git]
+
+Structure, keys, codings and the filtering rule are in
+`docs/clinical_metadata.md`. Columns added 2026-10-02:
+
+| Workbook | Column | Meaning |
+|---|---|---|
+| master | `Bulk_baseline_data` | usable baseline bulk data: `skin+PBMC`, `skin only`, `PBMC only`, `none` |
+| skin, PBMC | `Use_downstream` | `Yes` = use in analyses (one sample per Subject x Timepoint for skin, per subject for PBMC) |
+| skin, PBMC | `Use_reason` | why `Use_downstream` is `No` |
+| skin | `raw_library_size` ... `PCA_distance_PC1to5`, `Note`, `QC_flag` | per-sample QC, same definitions as the PBMC QC (01_1) |
