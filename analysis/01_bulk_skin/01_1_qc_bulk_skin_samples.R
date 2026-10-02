@@ -139,7 +139,7 @@ summ <- data.table(item = c("samples", "expressed genes used", "QC ok", "QC chec
                          qc[Use_downstream == "Yes" & Timepoint == "Baseline", uniqueN(Subject_ID)],
                          round(batch_r2, 3)))
 save_table(summ, run, "qc_summary")
-note_kinds <- qc[!is.na(Note), .(rule = unlist(strsplit(Note, "; ")))][, .(rule = sub(":.*| \\(.*", "", rule))][, .N, by = rule]
+note_kinds <- qc[!is.na(Note), .(rule = unlist(strsplit(Note, "; (?=[A-Z])", perl = TRUE)))]   # "; " also occurs inside brackets[, .(rule = sub(":.*| \\(.*", "", rule))][, .N, by = rule]
 save_table(note_kinds, run, "qc_rules_triggered")
 save_patient_table(qc, run, "skin_sample_qc")
 
