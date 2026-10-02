@@ -163,6 +163,7 @@ docs/
   inherited_objects.md   provenance of anything copied from a colleague
   lab_sources.md         what is where in colleagues' directories (read first)
   data_dictionary.md     field definitions
+  qc_freeze01.md         cell/library QC report; libraries driving the timepoint quality gap
   figure_manifest.md     figure -> script that makes it
   server_notes.md        screen, Positron, SSH, VPN
 data/ results/ figures/ logs/    [symlinks to large storage, gitignored]
