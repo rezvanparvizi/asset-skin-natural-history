@@ -553,3 +553,50 @@ The owner's blood QC script is not kept in the repo (it holds IDs); the
 blood metric definitions are documented in 01_1 and clinical_metadata.md.
 Supersedes the "copy blood QC script into the repo" point of the
 scripts-only entry above.
+
+## 2026-10-03 — Broad labels from wasikowr's labels (rule B; replaces rule A's naming step)
+
+Owner decision: name the top-level clusters with wasikowr's broad labels
+instead of marker panels. Recorded before the script first ran; thresholds
+set by Claude Code before any result, for owner confirmation, and not
+tuned on what comes out. Nothing here looks at mRSS_category.
+
+Why: R0039 met rule A at no resolution (ambiguous 29-41% of cells). The
+clusters are sound; the panel-margin naming failed for two structural
+reasons: sibling pairs (T/NK, B/plasma, Langerhans/myeloid,
+endothelial/mural) have margins near 0 by construction, and z-scoring
+genes across clusters compresses the keratinocyte panel when most
+clusters are keratinocytes. Her labels check out where checked (06_0
+panel detection; 93-99% agreement with our cleanly named clusters, R0039).
+
+- Clusters: R0039's saved Louvain clusters (Harmony SNN, fixed grid 0.05,
+  0.1, 0.2, 0.3, 0.5, 0.8). No new graph.
+- Reference cells: our QC-pass cells carrying `wasikowr_basectrl__celltype`
+  (176,380; baseline + HC only, about half of them because of jarnagin's
+  subset bug).
+- Rule B, per cluster: n_ref = reference cells in it; purity = share of the
+  most common label among them. Label = that label if n_ref >= 50 and
+  purity >= 0.75; "mixed" if n_ref >= 50 and purity < 0.75; "unlabelled" if
+  n_ref < 50.
+- Choose the LOWEST resolution where (1) each of her 16 labels is the label
+  of >= 1 cluster and (2) mixed + unlabelled clusters hold <= 5% of cells.
+  If none qualifies: no automatic choice; owner review.
+- Per-cell broad label = its cluster's label at the chosen resolution.
+- Cross-check (route C, not used to assign labels): kNN transfer on the
+  30 Harmony dims, k = 30 (Annoy), reference = the cells above, a reference
+  cell never counts itself. knn_conf = share of the top label among the
+  30; < 0.5 counted as low confidence. Reported: leave-one-out confusion on
+  reference cells, cluster label vs kNN label per cell, low-confidence share
+  by timepoint x label.
+- Main assumption, checked not assumed: baseline labels describe M03/M06
+  cells. Reported per cluster: M03 + M06 share of SSc cells next to n_ref
+  and purity; kNN confidence by timepoint.
+- Her labels have no plasma class; B/plasma is split at stage 09, as
+  already planned for pDC, plasma and NK.
+
+Rejected: revising rule A's panel score and margin (fixable, but every
+threshold would be chosen after seeing R0039's scores); kNN labels as the
+primary labels (forces month-3/6-only states into the nearest baseline
+type, cell by cell, with no cluster-level view); waiting for her
+full-object label table (blocked; kept on the list, would be compared
+against these labels when it arrives).
