@@ -9,7 +9,7 @@ organised; this says where we are.
 items to Done, revise In flight, add anything newly blocked. If it goes stale
 it becomes worse than nothing, because it will be believed.
 
-Last updated: **2026-10-02** · Updated by: Rezvan Parvizi (with Claude Code)
+Last updated: **2026-10-03** · Updated by: Rezvan Parvizi (with Claude Code)
 
 ---
 
@@ -19,13 +19,40 @@ Last updated: **2026-10-02** · Updated by: Rezvan Parvizi (with Claude Code)
 placebo arm. freeze01 (218 libraries): stage 00, cell QC (03_1) and the
 upstream comparison (06_0) are done. Ambient correction re-done with a
 fixed rho = 0.13 (04_2, R0026); integration of record R0028 (05_1) checked
-by R0034 (05_2). 05_3 top-level clustering (rule A, decisions.md) is
-running. Bulk metadata cleaned (docs/clinical_metadata.md). freeze02 is ON
+by R0034 (05_2). 05_3 top-level clustering ran (R0039) and NO resolution
+met rule A: owner review of the naming rule is the current blocker.
+Bulk metadata cleaned (docs/clinical_metadata.md). freeze02 is ON
 HOLD (owner decision).
 
 ---
 
 ## Done
+
+### 2026-10-03 — 05_3 result; 06_0 hardened and re-run
+
+- **05_3 R0039: no resolution met rule A** (owner review). Ambiguous
+  clusters hold 29-41% of cells at every resolution (limit 5%); required
+  labels covered 7/16 (res 0.05) to 15/16 (0.5, 0.8). B Cells are never
+  covered: B and plasma share one cluster (margin 0.01-0.03). Diagnosis
+  (aggregate tables only, no outcome): (1) sibling pairs (T/NK, B/plasma,
+  Langerhans/myeloid, endothelial/mural at 0.1) give small margins by
+  construction; (2) large keratinocyte clusters fail the 1.0 margin
+  because keratinocyte clusters are most of the clusters, so z-scoring
+  across clusters compresses their own panel's z (e.g. res 0.5 cluster 0,
+  212k cells, margin 0.70). Clustering itself looks sound (ARI 0.77 vs
+  jarnagin's immune labels at res 0.1). Cluster IDs at all six
+  resolutions are saved in R0039 `objects/top_level_clusters.csv.gz`, so a
+  revised naming rule can be applied without rebuilding the graph (~4 h).
+- 06_0 fixed (commit a1b5c23): fails loudly on a missing SoupX table, an
+  unmapped celltype, a non-unique orig.ident map, or cell names that do not
+  reduce to a 24-nt barcode. Re-run R0041 reproduces R0021 exactly; R0021
+  superseded. 05_3 will also compare with wasikowr's res-0.1 clusters
+  (all timepoints) on its next run; R0039 not re-run.
+- **04_1 `coarse_lineage` is unreliable for immune cells** (new table
+  `wasikowr_vs_our_coarse_lineage`, R0041): her T, Langerhans, mast, B and
+  myeloid cells sit mostly in our per-library "Keratinocyte" clusters
+  (0.54-0.87). Counts are unaffected (04_2 uses fixed rho 0.13), but do not
+  use 04_1 coarse_lineage downstream.
 
 ### 2026-10-02 — integration review, SoupX re-decided, colleague findings
 
@@ -147,13 +174,8 @@ HOLD (owner decision).
 
 ## In flight
 
-- **05_3 `cluster_top_level`** (R0039, started 2026-10-02 21:53 UTC;
-  R0038 failed on future.globals.maxSize, fixed). Log
-  `logs/20261002_215353_05_3_cluster_top_level_freeze01_reference.log`;
-  summary `results/freeze01/reference/05_sc_integration/cluster_top_level/CLUSTER_SUMMARY.txt`.
-  Read the rule A sweep first; if no resolution qualifies, the rule says
-  owner review, not an automatic choice. Do NOT look at mRSS_category with
-  the clusters.
+- Nothing running. 05_3 R0039 finished (no resolution chosen; see Done
+  2026-10-03 and Next up 1).
 
 ---
 
@@ -175,10 +197,15 @@ HOLD (owner decision).
 
 ## Next up, in order
 
-1. **Review 05_3 with the owner**: rule A sweep and chosen resolution;
-   timepoint composition per cluster (Harmony vs unintegrated PCA);
-   patient/pool-dominated clusters; agreement with wasikowr's and
-   jarnagin's labels (report only).
+1. **Revise the 05_3 naming rule (owner decision, then decisions.md)**:
+   R0039 met rule A at no resolution. Decide, on marker criteria only and
+   without mRSS_category in view: sibling pairs (T/NK, B/plasma,
+   Langerhans/myeloid, pericyte/SMC, endothelial/lymphatic) named at the
+   parent level instead of "ambiguous"; B vs plasma left to stage 09; a
+   panel score that is not compressed when one lineage dominates the
+   cluster count. Apply it to R0039's saved cluster IDs (no graph
+   rebuild). Then review timepoint composition and patient/pool-dominated
+   clusters at the chosen resolution.
 2. **Stage 06, broad labels**: freeze the top-level labels; lab pocket
    screen / doublet routine (flag, not delete). Plan for owner review first.
 3. **Compartment stages 07-11**: PCA + Harmony per compartment; repeat the
@@ -312,4 +339,8 @@ Detail belongs in `docs/decisions.md` (judgment) and `docs/runs.csv` (runs).
             for 05_3; 05_3 running. QC by timepoint (qc_freeze01.md).
             Bulk/clinical workbooks cleaned via scripts; Use_downstream
             in skin (219) and PBMC (67); one-time scripts removed.
+2026-10-03  05_3 R0039 finished: no resolution met rule A (ambiguous
+            29-41%; B never separates from plasma). 06_0 hardened and
+            re-run (R0041 = R0021; adds coarse-lineage table, which shows
+            04_1 coarse_lineage misplaces immune cells). R0021 superseded.
 ```
