@@ -9,7 +9,7 @@ organised; this says where we are.
 items to Done, revise In flight, add anything newly blocked. If it goes stale
 it becomes worse than nothing, because it will be believed.
 
-Last updated: **2026-10-03** · Updated by: Rezvan Parvizi (with Claude Code)
+Last updated: **2026-10-03** (evening) · Updated by: Rezvan Parvizi (with Claude Code)
 
 ---
 
@@ -19,14 +19,32 @@ Last updated: **2026-10-03** · Updated by: Rezvan Parvizi (with Claude Code)
 placebo arm. freeze01 (218 libraries): stage 00, cell QC (03_1) and the
 upstream comparison (06_0) are done. Ambient correction re-done with a
 fixed rho = 0.13 (04_2, R0026); integration of record R0028 (05_1) checked
-by R0034 (05_2). 05_3 top-level clustering ran (R0039) and NO resolution
-met rule A: owner review of the naming rule is the current blocker.
+by R0034 (05_2). 05_3 top-level clustering ran (R0039); neither rule A
+(R0039) nor rule B (06_1, R0042) gave broad labels. **Broad labels are on
+hold**: the owner wants wasikowr's own labels for all cells and has asked
+both colleagues for them (2026-10-03).
 Bulk metadata cleaned (docs/clinical_metadata.md). freeze02 is ON
 HOLD (owner decision).
 
 ---
 
 ## Done
+
+### 2026-10-03 (later) — rule B result; colleague objects surveyed
+
+- **06_1 R0042, rule B (clusters named by wasikowr's labels): no resolution
+  qualified.** At res 0.2-0.5 only pericyte vs smooth muscle failed (mixed
+  3.0%). kNN cross-check recovers her labels 88-99% (leave-one-out), with
+  the same confidence at M03/M06 as at baseline. Rules A and B are set
+  aside for now (owner).
+- **Her labels exist for all cells only in the June-August version of
+  wasikowr's seurat.RDS**, which the 2 Sep rewrite replaced (no `celltype`
+  column). jarnagin has no all-cells object; her readable all-timepoint
+  objects cover immune cells (104,675, 12 labels) and fibroblasts (143,963,
+  Round 1 only, no subtypes). No exported table covers all cells.
+  `/hits/home/jarnagin/{ASSET,freezes}` are unreadable to the owner too.
+  All of it, plus how she subset immune cells and fibroblasts, is in
+  docs/lab_sources.md.
 
 ### 2026-10-03 — 05_3 result; 06_0 hardened and re-run
 
@@ -174,8 +192,8 @@ HOLD (owner decision).
 
 ## In flight
 
-- Nothing running. 05_3 R0039 finished (no resolution chosen; see Done
-  2026-10-03 and Next up 1).
+- Nothing running. Waiting on wasikowr / jarnagin for the per-cell
+  broad labels (see Blocked).
 
 ---
 
@@ -183,6 +201,7 @@ HOLD (owner decision).
 
 | What | Waiting on | Why it matters |
 |---|---|---|
+| **wasikowr's broad labels for all cells** (old seurat.RDS, or a per-cell barcode -> celltype table) | wasikowr / jarnagin (asked 2026-10-03; not before Monday) | Stage 06 broad labels wait for it; rules A/B set aside. |
 | **Meaning of pool and sample-name date** | sequencing core / Jarnagin | batch_id is currently the pool (the best available stand-in). Confirm it is the capture batch. |
 | **Site ID per patient** | owner, from the clinical table | Adds site to the batch check (00_2 picks up `site_id` automatically). |
 | **Which of 13639-JF-11/-12 is Baseline** | Jarnagin / DCC | Both are excluded from cohorts until resolved. |
@@ -197,7 +216,10 @@ HOLD (owner decision).
 
 ## Next up, in order
 
-1. **Revise the 05_3 naming rule (owner decision, then decisions.md)**:
+0. **When the colleagues reply**: bring in wasikowr's per-cell labels
+   (record in inherited_objects.md), compare with R0042, then decide how
+   stage 06 assigns broad labels. Item 1 below is on hold until then.
+1. **(On hold) Revise the 05_3 naming rule (owner decision, then decisions.md)**:
    R0039 met rule A at no resolution. Decide, on marker criteria only and
    without mRSS_category in view: sibling pairs (T/NK, B/plasma,
    Langerhans/myeloid, pericyte/SMC, endothelial/lymphatic) named at the
@@ -343,4 +365,8 @@ Detail belongs in `docs/decisions.md` (judgment) and `docs/runs.csv` (runs).
             29-41%; B never separates from plasma). 06_0 hardened and
             re-run (R0041 = R0021; adds coarse-lineage table, which shows
             04_1 coarse_lineage misplaces immune cells). R0021 superseded.
+2026-10-03  06_1 rule B (R0042): no resolution qualified (pericyte vs SMC).
+            Surveyed all jarnagin objects/exports: no all-cells labels
+            readable; labels requested from colleagues. lab_sources.md
+            records her immune/fibroblast subsetting steps and outcomes.
 ```
