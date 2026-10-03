@@ -46,7 +46,8 @@ CL <- list(grid = c(0.05, 0.1, 0.2, 0.3, 0.5, 0.8), k_param = 20, louvain_n_star
            tp_enrich_flag = 2, tp_flag_min_cells = 500,
            dominance_flag = 0.5, dominance_min_cells = 200,
            panel_file = "metadata/gene_sets/top_level_panels.yml",
-           label_columns = c("wasikowr_basectrl__celltype", "jf_immune__celltype"),
+           label_columns = c("wasikowr_basectrl__celltype", "jf_immune__celltype",
+                             "wasikowr_object__RNA_snn_res.0.1"),   # her res-0.1 clusters: all timepoints, 1.19M of our cells
            plot_cells = 300000, seed = 1)
 
 run <- init_run(
@@ -209,10 +210,11 @@ for (r in unique(c(chosen, CL$compare_resolution))) {
   if (is.na(r)) next
   ours <- lab_at(r); clu <- cl_cols[[paste0("res_", r)]]
   for (col in CL$label_columns) {
-    theirs <- inh[[col]]; ok <- !is.na(theirs) & nzchar(theirs)
+    theirs <- as.character(inh[[col]]); ok <- !is.na(theirs) & nzchar(theirs)
+    is_cluster_id <- grepl("RNA_snn_res|seurat_clusters", col)   # unnamed clusters: ARI and top_our_label only
     x <- data.table(theirs = theirs[ok], ours = ours[ok])
     a <- ari(clu[ok], theirs[ok])
-    cmp[[paste(r, col)]] <- x[, .(cells = .N, agree = mean(ours == theirs),
+    cmp[[paste(r, col)]] <- x[, .(cells = .N, agree = if (is_cluster_id) NA_real_ else mean(ours == theirs),
                                   top_our_label = names(sort(table(ours), decreasing = TRUE))[1]),
                               by = theirs][, `:=`(resolution = r, source = col, ari_clusters_vs_theirs = a)][]
     xt[[paste(r, col)]] <- x[, .N, by = .(theirs, ours)][, `:=`(resolution = r, source = col)][]

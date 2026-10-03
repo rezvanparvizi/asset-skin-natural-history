@@ -61,38 +61,53 @@ run <- init_run(
 
 man <- read_manifest()
 fz  <- freeze_libraries(manifest = man)
-core <- function(x) sub("[-_].*$", "", x)
+stopifnot(!anyDuplicated(stats::na.omit(man$source_orig_ident)))   # lib_of below must be one-to-one
+n_excluded <- length(setdiff(man$library_id, fz$library_id))
+
+# Cell name -> 24-nt barcode. Assumes suffix-style names ("ACGT...-3_1");
+# a prefix-style name ("S12_ACGT...") would reduce to the prefix, so fail
+# loudly rather than let every key collide and be dropped as a duplicate.
+core <- function(x, what) {
+  b <- sub("[-_].*$", "", x)
+  bad <- !grepl("^[ACGT]{24}$", b)
+  if (any(bad)) stop(sprintf("%s: %s of %s cell names do not reduce to a 24-nt barcode (e.g. '%s')",
+                             what, format(sum(bad), big.mark = ","), format(length(b), big.mark = ","),
+                             x[which(bad)[1]]), call. = FALSE)
+  b
+}
 
 qc <- fread(file.path(results_dir("03_sc_qc", "cell_qc_per_library", cohort = "reference"),
                       "objects", "cell_qc.csv.gz"),
             select = c("cell_id", "library_id", "barcode", "n_umi", "n_genes", "qc_pass", "qc_fail_reason"))
 qc <- qc[library_id %in% fz$library_id]
-qc[, key := paste(library_id, core(barcode), sep = "|")]
+qc[, key := paste(library_id, core(barcode, "our cell_qc"), sep = "|")]
 stopifnot(!anyDuplicated(qc$key))
 
 # ---- read metadata from each upstream object ------------------
 
-read_meta <- function(path) {
+read_meta <- function(path, keep_object = FALSE) {
   o  <- readRDS(path)
   md <- if (inherits(o, "SingleCellExperiment")) as.data.frame(colData(o)) else o@meta.data
   md <- as.data.table(md, keep.rownames = "upstream_cell")
   lab <- setdiff(grep(LABEL_RE, names(md), value = TRUE), NOT_LABEL)
   lab <- lab[!vapply(md[, ..lab], is.numeric, logical(1))]
   keep <- intersect(c("upstream_cell", "orig.ident", "nCount_RNA", "nFeature_RNA", "time", lab), names(md))
-  rm(o); invisible(gc())
-  list(meta = md[, ..keep], labels = lab)
+  if (!keep_object) { rm(o); o <- NULL; invisible(gc()) }
+  list(meta = md[, ..keep], labels = lab, object = o)
 }
 
 lib_of <- setNames(man$library_id, man$source_orig_ident)
-meta <- list(); lab_cols <- list(); src_summary <- list()
+meta <- list(); lab_cols <- list(); src_summary <- list(); bc <- NULL
 for (s in names(SOURCES)) {
   if (!file.exists(SOURCES[[s]])) { message("  missing, skipped: ", SOURCES[[s]]); next }
   message("Reading ", s)
-  r <- read_meta(SOURCES[[s]])
+  r <- read_meta(SOURCES[[s]], keep_object = (s == "wasikowr_basectrl"))   # section 3 needs its counts
+  if (s == "wasikowr_basectrl") bc <- r$object
+  r$object <- NULL
   m <- r$meta
   m[, library_id := unname(lib_of[as.character(orig.ident)])]
-  m[, key := paste(library_id, core(upstream_cell), sep = "|")]
-  dup <- duplicated(m$key) | duplicated(m$key, fromLast = TRUE)
+  m[!is.na(library_id), key := paste(library_id, core(upstream_cell, s), sep = "|")]   # unmapped libraries: key NA
+  dup <- !is.na(m$key) & (duplicated(m$key) | duplicated(m$key, fromLast = TRUE))
   src_summary[[s]] <- data.table(
     source = s, path = SOURCES[[s]], cells = nrow(m),
     orig_ident_not_in_manifest = sum(is.na(m$library_id)),
@@ -177,7 +192,7 @@ panels <- c(mk$evidence_panels,
                  Pericyte_SMC = c("RGS5", "ACTA2", "MYH11", "TAGLN"),
                  Lymphatic = c("PROX1", "LYVE1", "CCL21", "TFF3"),
                  Adipocyte = c("ADIPOQ", "PLIN1", "FABP4", "PLIN4")))
-bc <- readRDS(SOURCES$wasikowr_basectrl)
+if (is.null(bc)) stop("wasikowr_basectrl object not read: ", SOURCES$wasikowr_basectrl, call. = FALSE)
 genes <- intersect(unique(unlist(panels)), rownames(bc))
 cnt <- as(LayerData(bc, assay = "RNA", layer = "counts")[genes, ], "dgCMatrix")
 ct  <- as.character(bc$celltype)
@@ -216,17 +231,17 @@ for (s in c("jf_immune", "jf_tcells", "jf_bplasma", "jf_fibroblast")) {
 if (length(agree)) save_table(rbindlist(agree)[order(source, -cells)], run,
                               "wasikowr_vs_jarnagin_labels")
 
-# against our own per-library coarse lineage (SoupX stage), if available
+# against our own per-library coarse lineage (SoupX stage). Required: R0021
+# ran while SoupX was still running and skipped this table without notice.
 sx <- file.path(results_dir("04_sc_ambient", "soupx_per_library", cohort = "reference"),
                 "objects", "soupx_cells.csv.gz")
-if (file.exists(sx)) {
-  s4 <- fread(sx, select = c("cell_id", "coarse_lineage"))
-  wc <- grep("__celltype$", names(lab), value = TRUE)[1]
-  x <- merge(lab[, c("cell_id", wc), with = FALSE], s4, by = "cell_id")
-  setnames(x, wc, "wasikowr_celltype")
-  save_table(x[!is.na(wasikowr_celltype), .N, by = .(wasikowr_celltype, coarse_lineage)][order(wasikowr_celltype, -N)],
-             run, "wasikowr_vs_our_coarse_lineage")
-}
+if (!file.exists(sx)) stop("SoupX cell table missing (run 04_1 first): ", sx, call. = FALSE)
+s4 <- fread(sx, select = c("cell_id", "coarse_lineage"))
+wc <- grep("__celltype$", names(lab), value = TRUE)[1]
+x <- merge(lab[, c("cell_id", wc), with = FALSE], s4, by = "cell_id")
+setnames(x, wc, "wasikowr_celltype")
+save_table(x[!is.na(wasikowr_celltype), .N, by = .(wasikowr_celltype, coarse_lineage)][order(wasikowr_celltype, -N)],
+           run, "wasikowr_vs_our_coarse_lineage")
 
 # ---- summary ------------------------------------------------
 
@@ -238,6 +253,9 @@ own_panel <- c(Keratinocytes = "Keratinocyte", Fibroblasts = "Fibroblast", `T Ce
                `Follicle Cells` = "Follicle", Pericytes = "Pericyte_SMC",
                `Smooth Muscle Cells` = "Pericyte_SMC", `L Endothelial Cells` = "Lymphatic",
                Adipocytes = "Adipocyte")
+unmapped <- setdiff(unique(det$celltype), names(own_panel))
+if (length(unmapped)) stop("wasikowr celltype(s) with no own panel: ", paste(unmapped, collapse = ", "), call. = FALSE)
+stopifnot(all(own_panel %in% det$panel))
 own <- det[, .(own = frac_cells[panel == own_panel[celltype[1]]],
                best_other = max(frac_cells[panel != own_panel[celltype[1]]]),
                best_other_panel = panel[panel != own_panel[celltype[1]]][which.max(frac_cells[panel != own_panel[celltype[1]]])]),
@@ -246,8 +264,9 @@ summary_lines <- c(
   sprintf("wasikowr object: %s cells; matched to our called cells: %s; to our QC-pass cells: %s",
           format(wo$cells, big.mark = ","), format(wo$matched_our_called, big.mark = ","),
           format(wo$matched_our_pass, big.mark = ",")),
-  sprintf("  her cells from libraries not in our sample map: %s; from our 3 excluded libraries: %s",
-          format(wo$orig_ident_not_in_manifest, big.mark = ","), format(wo$in_excluded_libraries, big.mark = ",")),
+  sprintf("  her cells from libraries not in our sample map: %s; from our %d excluded libraries: %s",
+          format(wo$orig_ident_not_in_manifest, big.mark = ","), n_excluded,
+          format(wo$in_excluded_libraries, big.mark = ",")),
   sprintf("  our QC-pass cells absent from her object: %s (median %s UMI)",
           format(ours_only$cells, big.mark = ","), ours_only$median_umi),
   "  her cells failing our QC, by reason:",
